@@ -1,7 +1,7 @@
-from providers.ai_recipe_extractor import AiRecipeExtractor
-from providers.reels_downloader import ReelDownloader
-from providers.local_json_recipe_repository import LocalJsonRecipeRepository
 from core.process_reel import ProcessReelService
+from providers.ai_recipe_extractor import AiRecipeExtractor
+from providers.local_json_recipe_repository import LocalJsonRecipeRepository
+from providers.reels_downloader import ReelDownloader
 
 
 def build_process_reel_service(

@@ -1,10 +1,11 @@
 from pathlib import Path
 
-from logger import logger
+from core.ports import RecipeRepository
 from domain.recipe_record import RecipeRecord
+from logger import logger
 
 
-class LocalJsonRecipeRepository:
+class LocalJsonRecipeRepository(RecipeRepository):
     def __init__(self, target_dir: str = "db"):
         self.target_dir = Path(target_dir)
 

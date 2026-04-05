@@ -2,8 +2,8 @@ from pathlib import Path
 
 from pydantic_ai import Agent, BinaryContent
 
-from logger import logger
 from domain.recipe import Recipe
+from logger import logger
 
 
 class AiRecipeExtractor:

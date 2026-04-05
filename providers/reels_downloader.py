@@ -3,8 +3,8 @@ from typing import cast
 
 from instaloader import Instaloader, Post
 
-from logger import logger
 from domain.reel import DownloadedReel
+from logger import logger
 
 
 class ReelDownloader:

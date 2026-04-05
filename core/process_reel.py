@@ -1,10 +1,10 @@
 import os
 
-from logger import logger
 from core.ports import RecipeExtractor, RecipeRepository, ReelDownloader
 from domain.recipe import Recipe
 from domain.recipe_record import RecipeRecord
 from domain.recipe_source import ReelRecipeSource
+from logger import logger
 
 
 class ProcessReelService:

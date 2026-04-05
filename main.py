@@ -1,9 +1,8 @@
 from dotenv import load_dotenv
 
-from logger import logger
 from connectors.cli import print_recipe, run_cli
 from infrastructure.container import build_process_reel_service
-
+from logger import logger
 
 load_dotenv()
 
