@@ -1,6 +1,7 @@
 import glob
 from typing import cast
 from instaloader import Instaloader, Post
+from logger import logger
 
 
 class InstagramClient:
@@ -9,23 +10,24 @@ class InstagramClient:
         self.target_dir = target_dir
 
     def download_reel(self, reel_url: str) -> tuple[str, str, str] | None:
-        shortcode = reel_url.split("/")[-2]
+        shortcode = self._extract_shortcode(reel_url)
+        if not shortcode:
+            logger.warning("The provided URL does not appear to be a valid Instagram Reel URL.")
+            return None
 
         try:
-            reel: Post = Post.from_shortcode(self.loader.context, shortcode)
-            assert isinstance(reel, Post), "The fetched object is not a Post instance."
-            reel = cast(Post, reel)
+            reel = self._fetch_post(shortcode)
         except Exception as e:
-            print(f"Error fetching reel: {e}")
+            logger.error(f"Error fetching reel: {e}")
             return None
 
         if not reel.is_video:
-            print("The provided URL does not point to a video reel.")
+            logger.warning("The provided URL does not point to a video reel.")
             return None
 
-        print("Downloading reel (video and caption)...")
+        logger.info("Downloading reel (video and caption)...")
         self.loader.download_post(reel, target=self.target_dir)
-        print(f"Reel downloaded successfully. Shortcode: {shortcode}")
+        logger.info(f"Reel downloaded successfully. Shortcode: {shortcode}")
 
         video_path = self._find_video_file(shortcode)
         if not video_path:
@@ -34,14 +36,30 @@ class InstagramClient:
         caption = reel.caption or ""
         return video_path, caption, shortcode
 
+    @staticmethod
+    def _extract_shortcode(reel_url: str) -> str | None:
+        url_array = reel_url.split("/")
+        is_reel = len(url_array) >= 3 and url_array[-3] == "reel"
+        if not is_reel:
+            return None
+
+        shortcode = url_array[-2]
+        if not shortcode:
+            return None
+        return shortcode
+
+    def _fetch_post(self, shortcode: str) -> Post:
+        reel: Post = Post.from_shortcode(self.loader.context, shortcode)
+        assert isinstance(reel, Post), "The fetched object is not a Post instance."
+        return cast(Post, reel)
+
     def _find_video_file(self, shortcode: str) -> str | None:
-        mp4_files = (
-            glob.glob(f"{self.target_dir}/*{shortcode}*.mp4")
-            or glob.glob(f"{self.target_dir}/*.mp4")
-        )
+        primary_match = glob.glob(f"{self.target_dir}/*{shortcode}*.mp4")
+        fallback_match = glob.glob(f"{self.target_dir}/*.mp4")
+        mp4_files = primary_match or fallback_match
 
         if not mp4_files:
-            print("Could not find downloaded video.")
+            logger.error("Could not find downloaded video.")
             return None
 
         return mp4_files[0]
