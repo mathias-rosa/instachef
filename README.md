@@ -1,122 +1,162 @@
-# 🍳 InstaCHEF
+# InstaCHEF
 
-Transform Instagram Reels into structured recipes using Google Gemini AI.
+InstaCHEF turns an Instagram reel into a structured recipe. The project follows a simple pipeline: download the reel, extract structured data with an LLM, then persist a normalized domain object as JSON.
 
-## Architecture
+## Project Overview
 
-Clean modular architecture for easy evolution and reusability:
+The code is organized into three layers:
 
+- `domain/` contains the Pydantic business models.
+- `core/` contains the ports and orchestration service.
+- `providers/` contains the concrete implementations: LLM extraction, JSON storage, reel downloading.
+- `connectors/` contains user-facing entry points, currently mostly the CLI.
+
+### Structure
+
+```text
+main.py                      CLI entry point
+connectors/
+  cli.py                     Console output
+  rest.py                    Minimal HTTP adapter
+core/
+  ports.py                   Business protocols
+  process_reel.py            Workflow orchestration
+domain/
+  recipe.py                  Recipe business model
+  recipe_source.py           Recipe provenance
+  reel.py                    Downloaded reel data
+providers/
+  ai_recipe_extractor.py     Pydantic AI + Gemini extraction
+  local_json_recipe_repository.py  Local JSON persistence
+  reels_downloader.py        Reel download logic
+db/                          Saved recipes
+downloaded_reels/            Temporary downloaded files
 ```
-main.py                 ← CLI entry point
-    ↓
-recipe_processor.py     ← Main orchestrator
-    ├→ instagram_client.py  ← Instagram Reel management
-    ├→ gemini_client.py     ← Google Gemini API integration
-    └→ models.py            ← Data models (Pydantic)
-```
 
-### Modules
+## Data Model
 
-- **`models.py`** : Defines `Recipe` data structure (title, ingredients, instructions).
-- **`instagram_client.py`** : Encapsulates Reel download logic via `instaloader`.
-- **`gemini_client.py`** : Handles Gemini 2.5 Flash API communication and recipe extraction.
-- **`recipe_processor.py`** : Orchestrates workflow (download → extract → save → cleanup).
-- **`main.py`** : Simple CLI interface delegating to `RecipeProcessor`.
+The core of the project is made of two objects:
 
-## Setup
+- `Recipe` represents the normalized recipe: title, description, dish type, difficulty, time, servings, ingredients, sub-recipes, steps, tags, and tips.
+- `RecipeResult` wraps the recipe together with its source.
 
-### Requirements
+For now, the only implemented source is `ReelRecipeSource`. It includes:
+
+- `source_type`
+- `reel_url`
+- `shortcode`
+- `author`
+- `caption`
+- `preview_url`
+
+This separation makes it easy to add future sources such as free text or images without changing the recipe model itself.
+
+## How It Works
+
+The current flow is:
+
+1. The user provides an Instagram reel URL.
+2. The reel is downloaded locally.
+3. The LLM extracts a structured recipe.
+4. The service builds a `RecipeResult` with the Instagram source.
+5. The result is saved as JSON in `db/`.
+6. The temporary video file is removed.
+
+## Installation
+
+Requirements:
+
 - Python 3.13+
-- `uv` (package manager)
+- `uv`
 
-### Installation
+Install dependencies:
 
 ```bash
-cd instachef
-
 uv sync
-
-export GEMINI_API_KEY="your-api-key-from-aistudio.google.com"
 ```
 
-Or edit `.env` directly:
+Then configure the Gemini key in your environment:
 
+```bash
+export GEMINI_API_KEY="your-key"
 ```
-GEMINI_API_KEY=your-google-ai-studio-api-key-here
+
+Or in a `.env` file:
+
+```env
+GEMINI_API_KEY=your-gemini-key
 ```
 
 ## Usage
+
+Run the CLI:
 
 ```bash
 uv run main.py
 ```
 
-Enter an Instagram Reel URL when prompted. The app will:
-1. Download the video and caption
-2. Extract recipe using Gemini 2.5 Flash
-3. Save as JSON
-4. Delete the local video file
+The program asks for an Instagram reel URL, processes the video, and prints the extracted recipe in the terminal. The JSON is also saved to `db/<shortcode>.json`.
 
 ## Output Example
 
+The saved JSON looks like this:
+
 ```json
 {
-  "title": "Classic Pasta Carbonara",
-  "ingredients": [
-    "400g tagliatelle pasta",
-    "200g bacon",
-    "3 eggs",
-    "100g parmesan",
-    "Black pepper",
-    "Salt"
-  ],
-  "instructions": [
-    "Boil salted water and cook pasta.",
-    "Fry bacon until crispy.",
-    "Mix eggs with cheese and pepper.",
-    "Combine hot pasta with hot bacon and egg mixture."
-  ]
+  "recipe": {
+    "title": "Bols de Riz au Poulet Shawarma (One-Pan)",
+    "description": "...",
+    "cuisine_type": "moyen-orientale",
+    "dish_type": "plat principal",
+    "difficulty": "moyen",
+    "ingredients": [],
+    "instructions": []
+  },
+  "source": {
+    "source_type": "reel",
+    "reel_url": "https://www.instagram.com/reel/...",
+    "shortcode": "...",
+    "author": "..."
+  }
 }
 ```
 
-## Future Extensibility
+## Local Preview
 
-### Telegram Bot
-```python
-from telegram.ext import Application
-from recipe_processor import RecipeProcessor
+A static preview page lives in `recipe-preview.html`. It can read JSON files from `db/` and render the recipe in a more visual layout.
 
-processor = RecipeProcessor()
+To test it locally, serve the workspace root and open the page in your browser:
 
-async def handle_reel(update, context):
-    recipe = processor.process_reel(update.message.text)
-    # Send to user
+```bash
+python3 -m http.server
 ```
 
-### REST API (FastAPI)
-```python
-from fastapi import FastAPI
-from recipe_processor import RecipeProcessor
+Then open:
 
-app = FastAPI()
-processor = RecipeProcessor()
-
-@app.post("/extract")
-async def extract(url: str):
-    return processor.process_reel(url)
+```text
+http://localhost:8000/recipe-preview.html?recipe=DLIBdQjt7oM
 ```
 
-### Docker
-```dockerfile
-FROM python:3.13-slim
-WORKDIR /app
-COPY . .
-RUN pip install uv && uv sync
-CMD ["uv", "run", "main.py"]
-```
+## LLM Configuration
 
-## Costs
+The extraction provider uses Pydantic AI with Gemini. The system prompt currently enforces:
 
-- **Gemini API** : Free tier up to 50 requests/day
-- **Instaloader** : No cost
-- **Infrastructure** : Minimal (Lambda-friendly)
+- French output only
+- metric units only
+- sub-recipes for self-contained components
+- a stable, structured recipe format
+
+## Planned Evolution
+
+The source model is designed to grow over time. Future additions may include:
+
+- text input sources
+- image input sources
+- extra application-specific metadata if needed
+
+The goal is to keep `Recipe` as a pure business object and store provenance separately in `RecipeResult`.
+
+## Notes
+
+- Existing JSON files in `db/` may need migration to the wrapped format.
+- The `downloaded_reels/` directory contains temporary artifacts that are cleaned up after processing.
