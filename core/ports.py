@@ -1,6 +1,8 @@
+from domain.recipe import Recipe
+from domain.recipe_record import RecipeRecord
 from typing import Protocol
 
-from domain.recipe import Recipe
+
 from domain.reel import DownloadedReel
 
 
@@ -13,4 +15,4 @@ class RecipeExtractor(Protocol):
 
 
 class RecipeRepository(Protocol):
-    def save(self, recipe: Recipe, source_id: str) -> None: ...
+    def save(self, recipe_result: RecipeRecord, source_id: str) -> None: ...

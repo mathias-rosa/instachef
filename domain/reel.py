@@ -6,3 +6,4 @@ class DownloadedReel:
     video_path: str
     caption: str
     shortcode: str
+    author: str

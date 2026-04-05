@@ -40,7 +40,10 @@ class ReelDownloader:
 
         caption = reel.caption or ""
         return DownloadedReel(
-            video_path=video_path, caption=caption, shortcode=shortcode
+            video_path=video_path,
+            caption=caption,
+            shortcode=shortcode,
+            author=reel.owner_username,
         )
 
     @staticmethod

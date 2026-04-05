@@ -3,6 +3,8 @@ import os
 from logger import logger
 from core.ports import RecipeExtractor, RecipeRepository, ReelDownloader
 from domain.recipe import Recipe
+from domain.recipe_record import RecipeRecord
+from domain.recipe_source import ReelRecipeSource
 
 
 class ProcessReelService:
@@ -28,7 +30,16 @@ class ProcessReelService:
             if not recipe:
                 return None
 
-            self.repository.save(recipe, downloaded.shortcode)
+            recipe_result = RecipeRecord(
+                recipe=recipe,
+                source=ReelRecipeSource(
+                    reel_url=reel_url,
+                    shortcode=downloaded.shortcode,
+                    caption=downloaded.caption,
+                    author=downloaded.author,
+                ),
+            )
+            self.repository.save(recipe_result, downloaded.shortcode)
             return recipe
         finally:
             self._cleanup_video(downloaded.video_path)

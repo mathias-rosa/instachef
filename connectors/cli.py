@@ -12,7 +12,11 @@ def print_recipe(recipe: Recipe) -> None:
         print(f"  - {ingredient}")
     print("\nInstructions:")
     for i, instruction in enumerate(recipe.instructions, 1):
-        print(f"  {i}. {instruction}")
+        if hasattr(instruction, "title") and hasattr(instruction, "description"):
+            prefix = f"{instruction.title}: " if instruction.title else ""
+            print(f"  {i}. {prefix}{instruction.description}")
+        else:
+            print(f"  {i}. {instruction}")
     print("=" * 25)
 
 
