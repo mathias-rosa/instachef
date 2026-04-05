@@ -1,31 +1,29 @@
-from typing import cast
-from instaloader import Instaloader, Post
+from dotenv import load_dotenv
+from recipe_processor import RecipeProcessor
 
 
-instaloader_instance = Instaloader()
+load_dotenv()
 
 
 def main():
-    reel_url = input("Enter the Instagram Reel URL: ")
-    shortcode = reel_url.split("/")[-2]  # Extract shortcode from URL
-    try:
-        reel: Post = Post.from_shortcode(instaloader_instance.context, shortcode)
-        assert isinstance(reel, Post), "The fetched object is not a Post instance."
-        reel = cast(Post, reel)  # Cast to Post for type checking
-    except Exception as e:
-        print(f"Error fetching reel: {e}")
-        return
+    processor = RecipeProcessor()
 
-    if not reel.is_video:
-        print("The provided URL does not point to a video reel.")
-        return
+    reel_url = input("Enter Instagram Reel URL: ")
 
-    instaloader_instance.download_post(reel, target="downloaded_reels")
+    recipe = processor.process_reel(reel_url)
 
-    print(f"Reel URL: {reel_url}")
-    print(f"Reel Metadata: {reel._full_metadata}")
-    print(f"Reel Caption: {reel.caption}")
-    print(f"Reel Video URL: {reel.video_url}")
+    if recipe:
+        print("\n=== EXTRACTED RECIPE ===")
+        print(f"Title: {recipe.title}")
+        print("\nIngredients:")
+        for ingredient in recipe.ingredients:
+            print(f"  - {ingredient}")
+        print("\nInstructions:")
+        for i, instruction in enumerate(recipe.instructions, 1):
+            print(f"  {i}. {instruction}")
+        print("=" * 25)
+    else:
+        print("Failed to extract recipe.")
 
 
 if __name__ == "__main__":
