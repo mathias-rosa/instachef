@@ -1,10 +1,12 @@
 from pathlib import Path
+
 from pydantic_ai import Agent, BinaryContent
-from models import Recipe
+
 from logger import logger
+from domain.recipe import Recipe
 
 
-class RecipeExtractor:
+class AiRecipeExtractor:
     MODEL = "gemini-3.1-flash-lite-preview"
 
     def __init__(self):
@@ -20,7 +22,7 @@ class RecipeExtractor:
             ),
         )
 
-    def extract_recipe(self, video_path: str, caption: str) -> str | None:
+    def extract_recipe(self, video_path: str, caption: str) -> Recipe | None:
         try:
             video_bytes = Path(video_path).read_bytes()
         except Exception as e:
@@ -43,8 +45,10 @@ class RecipeExtractor:
 
         output = result.output
         if isinstance(output, Recipe):
-            return output.model_dump_json()
-        return output
+            return output
+
+        logger.error("Recipe extraction returned unexpected output type.")
+        return None
 
     @staticmethod
     def _build_prompt(caption: str) -> str:

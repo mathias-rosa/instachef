@@ -1,18 +1,23 @@
 import glob
 from typing import cast
+
 from instaloader import Instaloader, Post
+
 from logger import logger
+from domain.reel import DownloadedReel
 
 
-class InstagramClient:
+class ReelDownloader:
     def __init__(self, target_dir: str = "downloaded_reels"):
         self.loader = Instaloader()
         self.target_dir = target_dir
 
-    def download_reel(self, reel_url: str) -> tuple[str, str, str] | None:
+    def download_reel(self, reel_url: str) -> DownloadedReel | None:
         shortcode = self._extract_shortcode(reel_url)
         if not shortcode:
-            logger.warning("The provided URL does not appear to be a valid Instagram Reel URL.")
+            logger.warning(
+                "The provided URL does not appear to be a valid Instagram Reel URL."
+            )
             return None
 
         try:
@@ -34,7 +39,9 @@ class InstagramClient:
             return None
 
         caption = reel.caption or ""
-        return video_path, caption, shortcode
+        return DownloadedReel(
+            video_path=video_path, caption=caption, shortcode=shortcode
+        )
 
     @staticmethod
     def _extract_shortcode(reel_url: str) -> str | None:
