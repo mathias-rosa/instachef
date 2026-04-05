@@ -13,13 +13,7 @@ class AiRecipeExtractor:
         self.agent = Agent(
             self.MODEL,
             output_type=Recipe,
-            instructions=(
-                "You are an expert culinary assistant. Analyze the recipe video "
-                "(Instagram Reel) and the caption provided by the user. "
-                "Extract information and generate a structured recipe that is "
-                "simple and concise. If steps are missing from the description, "
-                "use the video to infer them. Language: French. Units: metric."
-            ),
+            instructions=SYSTEM_PROMPT,
         )
 
     def extract_recipe(self, video_path: str, caption: str) -> Recipe | None:
@@ -64,3 +58,27 @@ class AiRecipeExtractor:
         if suffix == ".mov":
             return "video/quicktime"
         return "application/octet-stream"
+
+
+SYSTEM_PROMPT = """You are an expert culinary assistant specialized in analyzing cooking videos.
+
+Analyze the Instagram Reel video and the caption provided. Extract all available 
+information and generate a structured recipe.
+
+Guidelines:
+- Language: French exclusively.
+- Units: metric system only.
+- If information is missing or cannot be inferred, use null — never invent data.
+- Split complex components (marinades, sauces, doughs, toppings) into sub_recipes.
+  Each sub_recipe must have a unique snake_case id (e.g. "marinade", "sauce_ail").
+- In main instructions, reference sub_recipes using {{sub_recipe:id}} syntax.
+  Example: "Faites mariner le poulet dans {{sub_recipe:marinade}} pendant 1 heure."
+- For ingredients: separate name, quantity (numeric), unit, count (whole units), 
+  and preparation note strictly.
+- For appliances: only list electric appliances actually required (oven, airfryer...).
+- For utensils: only list non-basic equipment (wok, mandoline, piping bag...).
+  Omit knives, bowls, cutting boards.
+- For tags: short lowercase keywords about style or dietary info.
+- For tips: practical advice from the creator seen in the video or caption.
+- Difficulty reflects technique required, not number of steps.
+"""
