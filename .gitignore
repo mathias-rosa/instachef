@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.DS_Store
 
 # Virtual environments
 .venv
@@ -15,3 +16,6 @@ wheels/
 # Generated content
 downloaded_reels/
 db/
+
+# Skills
+.agents/
