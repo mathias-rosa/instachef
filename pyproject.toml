@@ -9,6 +9,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "pydantic-ai>=1.0.0",
     "python-dotenv>=1.2.2",
+    "supabase>=2.5.3",
     "ruff>=0.15.9",
 ]
 

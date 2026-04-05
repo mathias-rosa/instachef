@@ -160,3 +160,25 @@ The goal is to keep `Recipe` as a pure business object and store provenance sepa
 
 - Existing JSON files in `db/` may need migration to the wrapped format.
 - The `downloaded_reels/` directory contains temporary artifacts that are cleaned up after processing.
+
+## Setup Database
+
+To manually create the `recipes` table in Supabase, execute the following SQL command in the Supabase SQL Editor:
+
+```sql
+CREATE TABLE IF NOT EXISTS recipes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  recipe jsonb NOT NULL,
+  source jsonb NOT NULL,
+  created_at timestamp with time zone DEFAULT NOW(),
+  updated_at timestamp with time zone DEFAULT NOW()
+);
+
+ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all access" ON recipes
+  FOR ALL USING (TRUE);
+
+CREATE INDEX IF NOT EXISTS idx_recipes_created_at ON recipes(created_at);
+```
+

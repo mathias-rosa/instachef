@@ -14,4 +14,8 @@ class RecipeExtractor(Protocol):
 
 
 class RecipeRepository(Protocol):
-    def save(self, recipe_record: RecipeRecord, source_id: str) -> None: ...
+    def save(
+        self,
+        recipe_record: RecipeRecord,
+        source_id: str | None = None,
+    ) -> RecipeRecord | None: ...
