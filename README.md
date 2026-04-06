@@ -30,6 +30,44 @@ uv run main.py --mode telegram
 
 For full setup instructions, see [Installation](#installation).
 
+## Docker Deployment
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+- A configured `.env` file
+
+### Build the image
+
+```bash
+docker compose build
+```
+
+### Run in Telegram mode (default)
+
+```bash
+docker compose up -d
+```
+
+### Run in CLI mode
+
+```bash
+INSTACHEF_MODE=cli docker compose run --rm instachef
+```
+
+Stop it with:
+
+```bash
+docker compose down
+```
+
+### Notes
+
+- `db/` and `downloaded_reels/` are mounted as volumes to persist local data and temporary files.
+- The application mode is controlled by `INSTACHEF_MODE` (`cli` or `telegram`).
+- Keep secrets in `.env`; it is not copied into the image.
+
 ## Project Overview
 
 The code is organized into three layers:

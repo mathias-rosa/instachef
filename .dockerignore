@@ -1,0 +1,14 @@
+.git
+.gitignore
+.DS_Store
+.env
+.venv
+__pycache__
+*.pyc
+.ruff_cache
+
+db
+downloaded_reels
+
+.agents
+.vscode

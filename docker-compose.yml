@@ -1,0 +1,16 @@
+services:
+  instachef:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: instachef:latest
+    env_file:
+      - .env
+    environment:
+      INSTACHEF_MODE: ${INSTACHEF_MODE:-telegram}
+    command: uv run main.py --mode ${INSTACHEF_MODE:-telegram}
+    volumes:
+      - ./db:/app/db
+      - ./downloaded_reels:/app/downloaded_reels
+    stdin_open: true
+    tty: true
