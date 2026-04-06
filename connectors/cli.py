@@ -1,25 +1,39 @@
+import asyncio
+
+from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
-from domain.recipe import Recipe
+from logger import logger
 
 PROMPT_REEL_URL = "Enter Instagram Reel URL: "
 
 
-def print_recipe(recipe: Recipe) -> None:
-    print("\n=== EXTRACTED RECIPE ===")
-    print(f"Title: {recipe.title}")
-    print("\nIngredients:")
-    for ingredient in recipe.ingredients:
-        print(f"  - {ingredient}")
-    print("\nInstructions:")
-    for i, instruction in enumerate(recipe.instructions, 1):
-        if hasattr(instruction, "title") and hasattr(instruction, "description"):
-            prefix = f"{instruction.title}: " if instruction.title else ""
-            print(f"  {i}. {prefix}{instruction.description}")
-        else:
-            print(f"  {i}. {instruction}")
-    print("=" * 25)
+class CLIConnector(InstachefConnector):
+    def __init__(self, service: ProcessReelService) -> None:
+        self.service = service
 
+    async def run(self) -> None:
+        while True:
+            reel_url = await asyncio.to_thread(input, PROMPT_REEL_URL)
+            reel_url = reel_url.strip()
 
-def run_cli(service: ProcessReelService) -> Recipe | None:
-    reel_url = input(PROMPT_REEL_URL)
-    return service.execute(reel_url)
+            if reel_url.lower() == "exit":
+                print("Exiting the application. Goodbye!")
+                break
+
+            if not reel_url:
+                print("Error: No URL provided.")
+                continue
+
+            print("Processing the reel... This may take a few seconds.")
+            try:
+                recipe = await asyncio.to_thread(self.service.execute, reel_url)
+                if not recipe:
+                    print("Error: Failed to process the reel or save the recipe.")
+                    continue
+
+                print("\n✅ Recipe processed and saved successfully!")
+                print(f"Title: {recipe.title}")
+                print(f"Description: {recipe.description}")
+            except Exception as exc:
+                logger.error(f"CLI processing error: {exc}")
+                print("An unexpected error occurred while processing the reel.")

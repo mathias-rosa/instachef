@@ -8,6 +8,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, TelegramObject
 from aiogram.utils.formatting import Bold, Text
 
+from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
 from domain.recipe import Recipe
 from logger import logger
@@ -64,7 +65,7 @@ class AuthorizationMiddleware(BaseMiddleware):
         return token.split("@", maxsplit=1)[0][1:].lower()
 
 
-class TelegramConnector:
+class TelegramConnector(InstachefConnector):
     def __init__(
         self,
         service: ProcessReelService,
