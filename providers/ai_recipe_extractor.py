@@ -7,11 +7,9 @@ from logger import logger
 
 
 class AiRecipeExtractor:
-    MODEL = "gemini-3.1-flash-lite-preview"
-
-    def __init__(self):
+    def __init__(self, model_name: str):
         self.agent = Agent(
-            self.MODEL,
+            model_name,
             output_type=Recipe,
             instructions=SYSTEM_PROMPT,
         )

@@ -1,6 +1,34 @@
 # InstaCHEF
 
-InstaCHEF turns an Instagram reel into a structured recipe. The project follows a simple pipeline: download the reel, extract structured data with an LLM, then persist a normalized domain object as JSON.
+InstaCHEF turns Instagram reels into structured recipes using AI. Download a reel, extract recipe data with an LLM (Gemini or compatible), and save it to Supabase—via CLI or Telegram bot.
+
+## Quick Start
+
+### Install dependencies
+
+```bash
+uv sync
+```
+
+### Configure (create .env)
+
+```bash
+cp .env.example .env
+```
+
+### Run CLI
+
+```bash
+uv run main.py --mode cli
+```
+
+### Or run Telegram bot
+
+```bash
+uv run main.py --mode telegram
+```
+
+For full setup instructions, see [Installation](#installation).
 
 ## Project Overview
 
@@ -64,74 +92,84 @@ The current flow is:
 
 ## Installation
 
-Requirements:
+### Requirements
 
 - Python 3.13+
 - `uv`
+- A Supabase account (for data storage)
+- A Gemini API key (or another LLM provider)
 
-Install dependencies:
+### Setup
 
-```bash
-uv sync
-```
+1. **Install dependencies:**
 
-Then configure the Gemini key in your environment:
+   ```bash
+   uv sync
+   ```
 
-```bash
-export GEMINI_API_KEY="your-key"
-```
+2. **Configure environment variables** (create a `.env` file):
 
-Or in a `.env` file:
+   ```env
+   # Supabase
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_KEY=your-anon-key
 
-```env
-GEMINI_API_KEY=your-gemini-key
-```
+   # AI 
+   AI_MODEL=gemini-3.1-flash-lite-preview
+   GOOGLE_API_KEY=your-gemini-key
 
-For Telegram bot mode, also configure:
+   # Telegram bot
+   TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+   TELEGRAM_AUTHORIZED_USER_IDS=123456789,987654321
+   ```
 
-```env
-TELEGRAM_BOT_TOKEN=your-telegram-bot-token
-TELEGRAM_AUTHORIZED_USER_IDS=123456789,987654321
-```
+3. **Configure Supabase database** (using the provided SQL script or via the dashboard).
 
-The `TELEGRAM_AUTHORIZED_USER_IDS` is optional. If not set, all users can access the bot. To restrict access, add a comma-separated list of Telegram user IDs.
+### Environment Variables
 
-```sh
-TELEGRAM_AUTHORIZED_USER_IDS=1234567890, 0987654321
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SUPABASE_URL` | Yes | Supabase project URL |
+| `SUPABASE_KEY` | Yes | Supabase anon key |
+| `AI_MODEL` | No | Model name (default: `gemini-3.1-flash-lite-preview`) |
+| `GOOGLE_API_KEY` | No | Gemini API key (Pydantic AI reads it automatically) |
+| `TELEGRAM_BOT_TOKEN` | yes for `--mode telegram` | Telegram bot token 
+| `TELEGRAM_AUTHORIZED_USER_IDS` | No | Comma-separated list of allowed Telegram user IDs |
 
-Telegram auth is enforced by middleware. By default, these commands stay public even when a whitelist is set:
-
-- `/start`
-- `/help`
-- `/myid` (useful to retrieve your Telegram user ID)
+**Note:** For other AI providers (OpenAI, Anthropic), set `AI_MODEL` to the appropriate model name and ensure the corresponding env var is set (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.). See [Pydantic AI models](https://ai.pydantic.dev/models/overview/).
 
 ## Usage
 
-Run the CLI:
+### CLI Mode (default)
 
 ```bash
 uv run main.py
 ```
 
-Run the Telegram bot:
+1. Enter an Instagram reel URL when prompted
+2. The app downloads and processes the reel
+3. Recipe data is extracted and saved to Supabase
+4. Result is displayed in the terminal
+5. Downloaded video is cleaned up
 
-```bash
-uv run telegram_main.py
-```
+Type `exit` to quit the loop.
 
-The program asks for an Instagram reel URL, processes the video, and prints the extracted recipe in the terminal. The JSON is also saved to `db/<shortcode>.json`.
+### Data Model & Output
 
-## Output Example
+Recipes are stored in Supabase with two main components:
 
-The saved JSON looks like this:
+**Recipe** — the extracted dish data:
 
-```json
-{
-  "recipe": {
-    "title": "Bols de Riz au Poulet Shawarma (One-Pan)",
-    "description": "...",
-    "cuisine_type": "moyen-orientale",
+- `title`, `description`, `cuisine_type`, `dish_type`
+- `difficulty`, `time_minutes`, `servings`
+- `ingredients`, `instructions`, `sub_recipes`
+- `tags`, `tips`, `appliances`, `utensils`
+
+**RecipeSource** — the provenance:
+
+- `source_type`, `reel_url`, `shortcode`, `author`, `caption`
+
+Both are stored together in the `recipes` table in Supabase. "cuisine_type": "moyen-orientale",
     "dish_type": "plat principal",
     "difficulty": "moyen",
     "ingredients": [],
@@ -144,23 +182,6 @@ The saved JSON looks like this:
     "author": "..."
   }
 }
-```
-
-## Local Preview
-
-A static preview page lives in `recipe-preview.html`. It can read JSON files from `db/` and render the recipe in a more visual layout.
-
-To test it locally, serve the workspace root and open the page in your browser:
-
-```bash
-python3 -m http.server
-```
-
-Then open:
-
-```text
-http://localhost:8000/recipe-preview.html?recipe=DLIBdQjt7oM
-```
 
 ## LLM Configuration
 
@@ -171,24 +192,44 @@ The extraction provider uses Pydantic AI with Gemini. The system prompt currentl
 - sub-recipes for self-contained components
 - a stable, structured recipe format
 
-## Planned Evolution
+To AI Model Configuration
 
-The source model is designed to grow over time. Future additions may include:
+The app uses Pydantic AI to extract recipe data from video and caption. The system prompt enforces:
 
-- text input sources
-- image input sources
-- extra application-specific metadata if needed
+- **Language:** French only
+- **Units:** Metric system
+- **Structure:** Sub-recipes for complex components (marinades, sauces, etc.)
+- **Data integrity:** No invented data—uses `null` for missing information
 
+The default model is **Gemini** (`gemini-3.1-flash-lite-preview`), which handles video analysis well. To use another provider, set `AI_MODEL` and the corresponding API key:
+
+- OpenAI: `AI_MODEL=gpt-4o` + `OPENAI_API_KEY`
+- Anthropic: `AI_MODEL=claude-3-5-sonnet` + `ANTHROPIC_API_KEY`
+
+See [Pydantic AI models](https://ai.pydantic.dev/models/overview/) for the full lis
 The goal is to keep `Recipe` as a pure business object and store provenance separately in `RecipeResult`.
 
 ## Notes
 
 - Existing JSON files in `db/` may need migration to the wrapped format.
 - The `downloaded_reels/` directory contains temporary artifacts that are cleaned up after processing.
+Troubleshooting
 
-## Setup Database
+**"SUPABASE_URL and SUPABASE_KEY must be set"**
+- Check your `.env` file or system environment variables
+- Verify you have a Supabase project created
 
-To manually create the `recipes` table in Supabase, execute the following SQL command in the Supabase SQL Editor:
+**"TELEGRAM_BOT_TOKEN must be set" (when using `--mode telegram`)**
+- Set `TELEGRAM_BOT_TOKEN` in your `.env`
+- Create a bot via [@BotFather](https://t.me/BotFather) on Telegram
+
+**"Error generating recipe"**
+- Check that your API key is valid and has quota remaining
+- Try with a different reel
+
+**Reel download fails**
+- Some reels are region-restricted or private
+- Try a different URLSQL Editor:
 
 ```sql
 CREATE TABLE IF NOT EXISTS recipes (

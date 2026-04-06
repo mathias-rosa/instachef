@@ -70,17 +70,16 @@ class TelegramConnector(InstachefConnector):
         self,
         service: ProcessReelService,
         token: str,
-        authorized_user_ids: list[int] | None = None,
+        authorized_user_ids: set[int],
     ):
         self.service = service
         self.bot = Bot(token=token)
         self.dispatcher = Dispatcher()
         self.router = Router()
-        self.authorized_user_ids = set(authorized_user_ids or [])
 
         self.router.message.middleware(
             AuthorizationMiddleware(
-                authorized_user_ids=self.authorized_user_ids,
+                authorized_user_ids=authorized_user_ids,
                 allowed_commands={"start", "help", "myid"},
             )
         )

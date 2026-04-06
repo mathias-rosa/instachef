@@ -1,11 +1,11 @@
 import argparse
 import asyncio
-import os
 
 from dotenv import load_dotenv
 
 from connectors.cli import CLIConnector
 from connectors.telegram import TelegramConnector
+from infrastructure.config import AppConfig
 from infrastructure.container import build_process_reel_service
 
 load_dotenv()
@@ -21,23 +21,20 @@ async def main() -> None:
     )
     args = parser.parse_args()
 
-    service = build_process_reel_service()
+    config = AppConfig.from_env()
+    service = build_process_reel_service(config=config)
 
     if args.mode == "cli":
         connector = CLIConnector(service=service)
     elif args.mode == "telegram":
-        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        token = config.telegram_bot_token
         if not token:
             raise ValueError("TELEGRAM_BOT_TOKEN must be set")
 
-        authorized_user_ids = os.getenv("TELEGRAM_AUTHORIZED_USER_IDS", "")
-        user_ids = (
-            [int(uid) for uid in authorized_user_ids.split(",") if uid.strip()]
-            if authorized_user_ids
-            else []
-        )
         connector = TelegramConnector(
-            service=service, token=token, authorized_user_ids=user_ids
+            service=service,
+            token=token,
+            authorized_user_ids=set(config.telegram_authorized_user_ids),
         )
     else:
         raise ValueError(f"Unsupported mode: {args.mode}")
