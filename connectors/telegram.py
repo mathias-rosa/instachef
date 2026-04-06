@@ -1,7 +1,7 @@
 import asyncio
 import re
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import Any, cast
 
 from aiogram import BaseMiddleware, Bot, Dispatcher, Router
 from aiogram.filters import Command
@@ -10,7 +10,7 @@ from aiogram.utils.formatting import Bold, Text
 
 from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
-from domain.exceptions import NotARecipeError
+from domain.exceptions import InstachefError, NotARecipeError
 from domain.recipe import Recipe
 from logger import logger
 
@@ -133,11 +133,8 @@ class TelegramConnector(InstachefConnector):
                     "Ce Reel ne contient pas de recette valide. Envoie un autre Reel ! 👨‍🍳"
                 )
                 return
-
-            if not recipe:
-                await waiting_message.edit_text(
-                    "Erreur pendant le traitement ou l'enregistrement en base."
-                )
+            except InstachefError as exc:
+                await waiting_message.edit_text(f"Erreur: {exc}")
                 return
 
             response = Text(
@@ -148,14 +145,19 @@ class TelegramConnector(InstachefConnector):
             )
             await waiting_message.edit_text(response.as_html(), parse_mode="HTML")
 
-    async def _process_reel(self, reel_url: str) -> Recipe | None:
+    async def _process_reel(self, reel_url: str) -> Recipe:
         try:
-            return await asyncio.to_thread(self.service.execute, reel_url)
+            return cast(
+                Recipe,
+                await asyncio.to_thread(self.service.execute, reel_url),
+            )
         except NotARecipeError:
+            raise
+        except InstachefError:
             raise
         except Exception as exc:
             logger.error(f"Telegram bot reel processing error: {exc}")
-            return None
+            raise
 
     @staticmethod
     def _extract_reel_url(text: str) -> str | None:

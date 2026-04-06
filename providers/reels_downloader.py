@@ -3,6 +3,7 @@ from typing import cast
 
 from instaloader import Instaloader, Post
 
+from domain.exceptions import InvalidSourceError, SourceDownloadError, SourceFetchError
 from domain.reel import DownloadedReel
 from logger import logger
 
@@ -12,31 +13,31 @@ class ReelDownloader:
         self.loader = Instaloader()
         self.target_dir = target_dir
 
-    def download_reel(self, reel_url: str) -> DownloadedReel | None:
+    def download_reel(self, reel_url: str) -> DownloadedReel:
         shortcode = self._extract_shortcode(reel_url)
         if not shortcode:
-            logger.warning(
+            raise InvalidSourceError(
                 "The provided URL does not appear to be a valid Instagram Reel URL."
             )
-            return None
 
         try:
             reel = self._fetch_post(shortcode)
         except Exception as e:
-            logger.error(f"Error fetching reel: {e}")
-            return None
+            raise SourceFetchError(f"Error fetching reel: {e}") from e
 
         if not reel.is_video:
-            logger.warning("The provided URL does not point to a video reel.")
-            return None
+            raise InvalidSourceError("The provided URL does not point to a video reel.")
 
         logger.info("Downloading reel (video and caption)...")
-        self.loader.download_post(reel, target=self.target_dir)
+        try:
+            self.loader.download_post(reel, target=self.target_dir)
+        except Exception as e:
+            raise SourceDownloadError(f"Error downloading reel media: {e}") from e
         logger.info(f"Reel downloaded successfully. Shortcode: {shortcode}")
 
         video_path = self._find_video_file(shortcode)
         if not video_path:
-            return None
+            raise SourceDownloadError("Could not find downloaded video.")
 
         caption = reel.caption or ""
         return DownloadedReel(
@@ -69,7 +70,6 @@ class ReelDownloader:
         mp4_files = primary_match or fallback_match
 
         if not mp4_files:
-            logger.error("Could not find downloaded video.")
             return None
 
         return mp4_files[0]

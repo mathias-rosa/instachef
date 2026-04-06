@@ -2,6 +2,11 @@ from pathlib import Path
 
 from pydantic_ai import Agent, BinaryContent
 
+from domain.exceptions import (
+    RecipeGenerationError,
+    UnexpectedExtractionOutputError,
+    VideoReadError,
+)
 from domain.recipe import Recipe
 from logger import logger
 
@@ -14,12 +19,11 @@ class AiRecipeExtractor:
             instructions=SYSTEM_PROMPT,
         )
 
-    def extract_recipe(self, video_path: str, caption: str) -> Recipe | None:
+    def extract_recipe(self, video_path: str, caption: str) -> Recipe:
         try:
             video_bytes = Path(video_path).read_bytes()
         except Exception as e:
-            logger.error(f"Could not read video file: {e}")
-            return None
+            raise VideoReadError(f"Could not read video file: {e}") from e
 
         logger.info("Generating recipe...")
 
@@ -32,15 +36,15 @@ class AiRecipeExtractor:
         try:
             result = self.agent.run_sync([prompt, video_content])
         except Exception as e:
-            logger.error(f"Error generating recipe: {e}")
-            return None
+            raise RecipeGenerationError(f"Error generating recipe: {e}") from e
 
         output = result.output
         if isinstance(output, Recipe):
             return output
 
-        logger.error("Recipe extraction returned unexpected output type.")
-        return None
+        raise UnexpectedExtractionOutputError(
+            "Recipe extraction returned unexpected output type."
+        )
 
     @staticmethod
     def _build_prompt(caption: str) -> str:

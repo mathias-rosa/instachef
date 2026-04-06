@@ -1,8 +1,8 @@
 from supabase import Client, create_client
 
 from core.ports import RecipeRepository
+from domain.exceptions import RepositoryReadError, RepositoryWriteError
 from domain.recipe_record import RecipeRecord
-from logger import logger
 
 
 class SupabaseRecipeRepository(RecipeRepository):
@@ -14,7 +14,7 @@ class SupabaseRecipeRepository(RecipeRepository):
     def save(
         self,
         recipe_record: RecipeRecord,
-    ) -> RecipeRecord | None:
+    ) -> RecipeRecord:
         try:
             payload = recipe_record.model_dump(mode="json")
             response = self.client.table(self.TABLE_NAME).upsert(
@@ -24,14 +24,16 @@ class SupabaseRecipeRepository(RecipeRepository):
 
             rows = getattr(response, "data", None)
             if not rows:
-                logger.error("Supabase upsert returned no rows.")
-                return None
+                raise RepositoryWriteError("Supabase upsert returned no rows.")
 
             first_row = rows[0]
             return RecipeRecord.model_validate(first_row)
         except Exception as exc:
-            logger.error(f"Error saving recipe to Supabase: {exc}")
-            return None
+            if isinstance(exc, RepositoryWriteError):
+                raise
+            raise RepositoryWriteError(
+                f"Error saving recipe to Supabase: {exc}"
+            ) from exc
 
     def find_by_id(self, record_id: str) -> RecipeRecord | None:
         try:
@@ -48,5 +50,6 @@ class SupabaseRecipeRepository(RecipeRepository):
 
             return RecipeRecord.model_validate(rows[0])
         except Exception as exc:
-            logger.error(f"Error finding recipe by id in Supabase: {exc}")
-            return None
+            raise RepositoryReadError(
+                f"Error finding recipe by id in Supabase: {exc}"
+            ) from exc

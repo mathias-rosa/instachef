@@ -1,8 +1,10 @@
 import asyncio
+from typing import cast
 
 from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
-from domain.exceptions import NotARecipeError
+from domain.exceptions import InstachefError, NotARecipeError
+from domain.recipe import Recipe
 from logger import logger
 
 PROMPT_REEL_URL = "Enter Instagram Reel URL: "
@@ -27,16 +29,18 @@ class CLIConnector(InstachefConnector):
 
             print("Processing the reel... This may take a few seconds.")
             try:
-                recipe = await asyncio.to_thread(self.service.execute, reel_url)
-                if not recipe:
-                    print("Error: Failed to process the reel or save the recipe.")
-                    continue
-
+                recipe = cast(
+                    Recipe,
+                    await asyncio.to_thread(self.service.execute, reel_url),
+                )
                 print("\n✅ Recipe processed and saved successfully!")
                 print(f"Title: {recipe.title}")
                 print(f"Description: {recipe.description}")
             except NotARecipeError:
                 print("Error: The extracted content is not a valid recipe.")
+            except InstachefError as exc:
+                logger.error(f"CLI processing error: {exc}")
+                print(f"Error: {exc}")
             except Exception as exc:
                 logger.error(f"CLI processing error: {exc}")
                 print("An unexpected error occurred while processing the reel.")

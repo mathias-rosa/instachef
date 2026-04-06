@@ -19,10 +19,8 @@ class ProcessReelService:
         self.extractor = extractor
         self.repository = repository
 
-    def execute(self, reel_url: str) -> Recipe | None:
+    def execute(self, reel_url: str) -> Recipe:
         downloaded = self.downloader.download_reel(reel_url)
-        if not downloaded:
-            return None
 
         try:
             source = ReelRecipeSource(
@@ -42,8 +40,6 @@ class ProcessReelService:
             recipe = self.extractor.extract_recipe(
                 downloaded.video_path, downloaded.caption
             )
-            if not recipe:
-                return None
 
             if not recipe.is_recipe:
                 logger.info("The extracted content is not a valid recipe.")
@@ -54,9 +50,6 @@ class ProcessReelService:
                 source=source,
             )
             saved = self.repository.save(recipe_result)
-            if not saved:
-                logger.error("Recipe extraction succeeded but database save failed.")
-                return None
             return saved.recipe
         finally:
             self._cleanup_video(downloaded.video_path)

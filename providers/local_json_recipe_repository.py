@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from core.ports import RecipeRepository
+from domain.exceptions import RepositoryReadError, RepositoryWriteError
 from domain.recipe_record import RecipeRecord
-from logger import logger
 
 
 class LocalJsonRecipeRepository(RecipeRepository):
@@ -12,18 +12,23 @@ class LocalJsonRecipeRepository(RecipeRepository):
     def save(
         self,
         recipe_record: RecipeRecord,
-    ) -> RecipeRecord | None:
+    ) -> RecipeRecord:
         if not recipe_record.id:
-            logger.error("recipe_record.id is required to save recipe JSON locally.")
-            return None
+            raise RepositoryWriteError(
+                "recipe_record.id is required to save recipe JSON locally."
+            )
 
-        self.target_dir.mkdir(parents=True, exist_ok=True)
-        recipe_path = self._recipe_path(recipe_record.id)
-        recipe_path.write_text(
-            recipe_record.model_dump_json(indent=2), encoding="utf-8"
-        )
-        logger.info(f"Recipe saved to: {recipe_path}")
-        return recipe_record
+        try:
+            self.target_dir.mkdir(parents=True, exist_ok=True)
+            recipe_path = self._recipe_path(recipe_record.id)
+            recipe_path.write_text(
+                recipe_record.model_dump_json(indent=2), encoding="utf-8"
+            )
+            return recipe_record
+        except Exception as exc:
+            raise RepositoryWriteError(
+                f"Error saving recipe to local JSON store: {exc}"
+            ) from exc
 
     def find_by_id(self, record_id: str) -> RecipeRecord | None:
         recipe_path = self._recipe_path(record_id)
@@ -35,8 +40,9 @@ class LocalJsonRecipeRepository(RecipeRepository):
                 recipe_path.read_text(encoding="utf-8")
             )
         except Exception as exc:
-            logger.error(f"Error loading recipe from local JSON store: {exc}")
-            return None
+            raise RepositoryReadError(
+                f"Error loading recipe from local JSON store: {exc}"
+            ) from exc
 
     def _recipe_path(self, record_id: str) -> Path:
         safe_record_id = record_id.replace(":", "__")
