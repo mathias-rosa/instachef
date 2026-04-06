@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+from logger import logger
 
 
 SUPPORTED_REPOSITORY_BACKENDS = {"supabase", "local_json"}
@@ -20,11 +21,15 @@ class AppConfig:
         repository_backend = os.getenv("RECIPE_REPOSITORY_BACKEND", "supabase").strip()
         if repository_backend not in SUPPORTED_REPOSITORY_BACKENDS:
             supported = ", ".join(sorted(SUPPORTED_REPOSITORY_BACKENDS))
+            logger.error(f"Invalid repository backend: {repository_backend}")
             raise ValueError(f"RECIPE_REPOSITORY_BACKEND must be one of: {supported}")
 
         supabase_url = os.getenv("SUPABASE_URL")
         supabase_key = os.getenv("SUPABASE_KEY")
         if repository_backend == "supabase" and (not supabase_url or not supabase_key):
+            logger.error(
+                "SUPABASE_URL and SUPABASE_KEY must be set for Supabase backend."
+            )
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set")
 
         return cls(

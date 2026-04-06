@@ -23,6 +23,7 @@ class AiRecipeExtractor:
         try:
             video_bytes = Path(video_path).read_bytes()
         except Exception as e:
+            logger.error(f"Could not read video file: {e}")
             raise VideoReadError(f"Could not read video file: {e}") from e
 
         logger.info("Generating recipe...")
@@ -36,12 +37,14 @@ class AiRecipeExtractor:
         try:
             result = self.agent.run_sync([prompt, video_content])
         except Exception as e:
+            logger.error(f"Error generating recipe: {e}")
             raise RecipeGenerationError(f"Error generating recipe: {e}") from e
 
         output = result.output
         if isinstance(output, Recipe):
             return output
 
+        logger.error("Recipe extraction returned unexpected output type.")
         raise UnexpectedExtractionOutputError(
             "Recipe extraction returned unexpected output type."
         )

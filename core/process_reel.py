@@ -41,7 +41,7 @@ class ProcessReelService:
             )
 
             if not recipe.is_recipe:
-                logger.info("The extracted content is not a valid recipe.")
+                logger.error("The extracted content is not a valid recipe.")
                 raise NotARecipeError("The extracted content is not a valid recipe.")
 
             recipe_result = RecipeRecord(
@@ -58,6 +58,5 @@ class ProcessReelService:
         try:
             if os.path.exists(video_path):
                 os.remove(video_path)
-                logger.debug(f"Cleaned up video: {video_path}")
-        except Exception as e:
-            logger.error(f"Error cleaning up video: {e}")
+        except Exception as exc:
+            logger.error(f"Error cleaning up video file: {exc}")

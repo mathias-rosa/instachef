@@ -4,6 +4,7 @@ from providers.ai_recipe_extractor import AiRecipeExtractor
 from providers.local_json_recipe_repository import LocalJsonRecipeRepository
 from providers.reels_downloader import ReelDownloader
 from providers.supabase_recipe_repository import SupabaseRecipeRepository
+from logger import logger
 
 
 def build_process_reel_service(
@@ -26,10 +27,14 @@ def _build_repository(config: AppConfig):
 
     if config.repository_backend == "supabase":
         if not config.supabase_url or not config.supabase_key:
+            logger.error(
+                "SUPABASE_URL and SUPABASE_KEY must be set for Supabase backend."
+            )
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set")
         return SupabaseRecipeRepository(
             url=config.supabase_url,
             key=config.supabase_key,
         )
 
+    logger.error(f"Unsupported repository backend: {config.repository_backend}")
     raise ValueError(f"Unsupported repository backend: {config.repository_backend}")

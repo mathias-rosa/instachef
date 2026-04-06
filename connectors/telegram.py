@@ -158,7 +158,7 @@ class TelegramConnector(InstachefConnector):
         except InstachefError:
             raise
         except Exception as exc:
-            logger.error(f"Telegram bot reel processing error: {exc}")
+            logger.error(f"Unexpected error processing reel: {exc}")
             raise
 
     @staticmethod

@@ -8,6 +8,7 @@ from domain.recipe_source import (
     ReelRecipeSource,
     TextRecipeSource,
 )
+from logger import logger
 
 
 class RecipeRecord(BaseModel):
@@ -27,5 +28,8 @@ class RecipeRecord(BaseModel):
         if self.id is None:
             self.id = canonical_id
         elif self.id != canonical_id:
+            logger.error(
+                f"RecipeRecord.id {self.id} does not match source canonical id {canonical_id}."
+            )
             raise ValueError("RecipeRecord.id must match the source canonical id.")
         return self
