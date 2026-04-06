@@ -39,7 +39,10 @@ class ProcessReelService:
                     author=downloaded.author,
                 ),
             )
-            self.repository.save(recipe_result, downloaded.shortcode)
+            saved = self.repository.save(recipe_result, downloaded.shortcode)
+            if not saved:
+                logger.error("Recipe extraction succeeded but database save failed.")
+                return None
             return recipe
         finally:
             self._cleanup_video(downloaded.video_path)

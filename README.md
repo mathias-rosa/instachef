@@ -87,12 +87,37 @@ Or in a `.env` file:
 GEMINI_API_KEY=your-gemini-key
 ```
 
+For Telegram bot mode, also configure:
+
+```env
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+TELEGRAM_AUTHORIZED_USER_IDS=123456789,987654321
+```
+
+The `TELEGRAM_AUTHORIZED_USER_IDS` is optional. If not set, all users can access the bot. To restrict access, add a comma-separated list of Telegram user IDs.
+
+```sh
+TELEGRAM_AUTHORIZED_USER_IDS=1234567890, 0987654321
+```
+
+Telegram auth is enforced by middleware. By default, these commands stay public even when a whitelist is set:
+
+- `/start`
+- `/help`
+- `/myid` (useful to retrieve your Telegram user ID)
+
 ## Usage
 
 Run the CLI:
 
 ```bash
 uv run main.py
+```
+
+Run the Telegram bot:
+
+```bash
+uv run telegram_main.py
 ```
 
 The program asks for an Instagram reel URL, processes the video, and prints the extracted recipe in the terminal. The JSON is also saved to `db/<shortcode>.json`.

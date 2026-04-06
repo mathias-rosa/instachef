@@ -27,6 +27,32 @@ wheels = [
 ]
 
 [[package]]
+name = "aiofiles"
+version = "25.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/c3/534eac40372d8ee36ef40df62ec129bee4fdb5ad9706e58a29be53b2c970/aiofiles-25.1.0.tar.gz", hash = "sha256:a8d728f0a29de45dc521f18f07297428d56992a742f0cd2701ba86e44d23d5b2", size = 46354, upload-time = "2025-10-09T20:51:04.358Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bc/8a/340a1555ae33d7354dbca4faa54948d76d89a27ceef032c8c3bc661d003e/aiofiles-25.1.0-py3-none-any.whl", hash = "sha256:abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695", size = 14668, upload-time = "2025-10-09T20:51:03.174Z" },
+]
+
+[[package]]
+name = "aiogram"
+version = "3.27.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiofiles" },
+    { name = "aiohttp" },
+    { name = "certifi" },
+    { name = "magic-filter" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b5/09/4bfeb0314b4d78739fc7c3cdcaa77eacaeb089312d9c16f3eb538d0f0f97/aiogram-3.27.0.tar.gz", hash = "sha256:ed5fd6b40d80a6cdb215ab162c9bd9d9b7892fb2710b45e3b762a98c21119297", size = 1753647, upload-time = "2026-04-03T22:57:00.39Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/aa/1f/64c4a9428d15ccea5aa7b204fd53061b94407640d6b075cd61c38899dd53/aiogram-3.27.0-py3-none-any.whl", hash = "sha256:26a091b6266d87db514e02703072035e7c17feebef480f927083bcfb22f634a3", size = 727326, upload-time = "2026-04-03T22:56:58.427Z" },
+]
+
+[[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -997,6 +1023,7 @@ name = "instachef"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiogram" },
     { name = "instaloader" },
     { name = "pydantic" },
     { name = "pydantic-ai" },
@@ -1007,6 +1034,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiogram", specifier = ">=3.21.0" },
     { name = "instaloader", specifier = ">=4.15.1" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pydantic-ai", specifier = ">=1.0.0" },
@@ -1235,6 +1263,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/08/a2/8d5a3c1c282d5f2bd9f5e9ddd5288d1414a53301ce389af9016b6d82bd50/logfire_api-4.31.0.tar.gz", hash = "sha256:fc4b01257ebd4ce297ad374ed201eb1a9213b999f6ae6df45cfca5bd0ef378f8", size = 77838, upload-time = "2026-03-27T19:00:47.545Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/26/27/9372b7492b3e146908d520f8599909311cd930175801ad219171fafc6f3e/logfire_api-4.31.0-py3-none-any.whl", hash = "sha256:3c1f502fd4eb8ef0996427a5cf275fd8f327f38600650a1f53071a8171c812db", size = 123402, upload-time = "2026-03-27T19:00:44.952Z" },
+]
+
+[[package]]
+name = "magic-filter"
+version = "1.0.12"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e6/08/da7c2cc7398cc0376e8da599d6330a437c01d3eace2f2365f300e0f3f758/magic_filter-1.0.12.tar.gz", hash = "sha256:4751d0b579a5045d1dc250625c4c508c18c3def5ea6afaf3957cb4530d03f7f9", size = 11071, upload-time = "2023-10-01T12:33:19.006Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cc/75/f620449f0056eff0ec7c1b1e088f71068eb4e47a46eb54f6c065c6ad7675/magic_filter-1.0.12-py3-none-any.whl", hash = "sha256:e5929e544f310c2b1f154318db8c5cdf544dd658efa998172acd2e4ba0f6c6a6", size = 11335, upload-time = "2023-10-01T12:33:17.711Z" },
 ]
 
 [[package]]
