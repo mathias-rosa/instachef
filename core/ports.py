@@ -17,5 +17,6 @@ class RecipeRepository(Protocol):
     def save(
         self,
         recipe_record: RecipeRecord,
-        source_id: str | None = None,
     ) -> RecipeRecord | None: ...
+
+    def find_by_id(self, record_id: str) -> RecipeRecord | None: ...

@@ -12,16 +12,32 @@ class LocalJsonRecipeRepository(RecipeRepository):
     def save(
         self,
         recipe_record: RecipeRecord,
-        source_id: str | None = None,
     ) -> RecipeRecord | None:
-        if not source_id:
-            logger.error("source_id is required to save recipe JSON locally.")
+        if not recipe_record.id:
+            logger.error("recipe_record.id is required to save recipe JSON locally.")
             return None
 
         self.target_dir.mkdir(parents=True, exist_ok=True)
-        recipe_path = self.target_dir / f"{source_id}.json"
+        recipe_path = self._recipe_path(recipe_record.id)
         recipe_path.write_text(
             recipe_record.model_dump_json(indent=2), encoding="utf-8"
         )
         logger.info(f"Recipe saved to: {recipe_path}")
         return recipe_record
+
+    def find_by_id(self, record_id: str) -> RecipeRecord | None:
+        recipe_path = self._recipe_path(record_id)
+        if not recipe_path.exists():
+            return None
+
+        try:
+            return RecipeRecord.model_validate_json(
+                recipe_path.read_text(encoding="utf-8")
+            )
+        except Exception as exc:
+            logger.error(f"Error loading recipe from local JSON store: {exc}")
+            return None
+
+    def _recipe_path(self, record_id: str) -> Path:
+        safe_record_id = record_id.replace(":", "__")
+        return self.target_dir / f"{safe_record_id}.json"

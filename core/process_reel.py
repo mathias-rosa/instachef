@@ -24,6 +24,20 @@ class ProcessReelService:
             return None
 
         try:
+            source = ReelRecipeSource(
+                reel_url=reel_url,
+                shortcode=downloaded.shortcode,
+                caption=downloaded.caption,
+                author=downloaded.author,
+            )
+
+            existing_record = self.repository.find_by_id(source.canonical_id())
+            if existing_record:
+                logger.info(
+                    f"Reel already processed, reusing stored record: {existing_record.id}"
+                )
+                return existing_record.recipe
+
             recipe = self.extractor.extract_recipe(
                 downloaded.video_path, downloaded.caption
             )
@@ -32,18 +46,13 @@ class ProcessReelService:
 
             recipe_result = RecipeRecord(
                 recipe=recipe,
-                source=ReelRecipeSource(
-                    reel_url=reel_url,
-                    shortcode=downloaded.shortcode,
-                    caption=downloaded.caption,
-                    author=downloaded.author,
-                ),
+                source=source,
             )
-            saved = self.repository.save(recipe_result, downloaded.shortcode)
+            saved = self.repository.save(recipe_result)
             if not saved:
                 logger.error("Recipe extraction succeeded but database save failed.")
                 return None
-            return recipe
+            return saved.recipe
         finally:
             self._cleanup_video(downloaded.video_path)
 

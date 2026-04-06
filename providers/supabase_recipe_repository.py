@@ -1,9 +1,6 @@
-from typing import Any
-
 from supabase import Client, create_client
 
 from core.ports import RecipeRepository
-from domain.recipe import Recipe
 from domain.recipe_record import RecipeRecord
 from logger import logger
 
@@ -17,15 +14,17 @@ class SupabaseRecipeRepository(RecipeRepository):
     def save(
         self,
         recipe_record: RecipeRecord,
-        source_id: str | None = None,
     ) -> RecipeRecord | None:
         try:
             payload = recipe_record.model_dump(mode="json")
-            response = self.client.table(self.TABLE_NAME).insert(payload).execute()
+            response = self.client.table(self.TABLE_NAME).upsert(
+                payload,
+                on_conflict="id",
+            ).execute()
 
             rows = getattr(response, "data", None)
             if not rows:
-                logger.error("Supabase insert returned no rows.")
+                logger.error("Supabase upsert returned no rows.")
                 return None
 
             first_row = rows[0]
@@ -34,12 +33,12 @@ class SupabaseRecipeRepository(RecipeRepository):
             logger.error(f"Error saving recipe to Supabase: {exc}")
             return None
 
-    def find_by_id(self, id: str) -> Recipe | None:
+    def find_by_id(self, record_id: str) -> RecipeRecord | None:
         try:
             response = (
                 self.client.table(self.TABLE_NAME)
                 .select("*")
-                .eq("id", id)
+                .eq("id", record_id)
                 .limit(1)
                 .execute()
             )
@@ -47,15 +46,7 @@ class SupabaseRecipeRepository(RecipeRepository):
             if not rows:
                 return None
 
-            recipe_payload = self._extract_recipe_payload(rows[0])
-            return Recipe.model_validate(recipe_payload)
+            return RecipeRecord.model_validate(rows[0])
         except Exception as exc:
             logger.error(f"Error finding recipe by id in Supabase: {exc}")
             return None
-
-    @staticmethod
-    def _extract_recipe_payload(row: dict[str, Any]) -> dict[str, Any]:
-        recipe_payload = row.get("recipe")
-        if isinstance(recipe_payload, dict):
-            return recipe_payload
-        return row
