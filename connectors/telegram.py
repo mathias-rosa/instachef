@@ -11,7 +11,7 @@ from aiogram.utils.formatting import Bold, Text
 from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
 from domain.exceptions import InstachefError, NotARecipeError
-from domain.recipe import Recipe
+from domain.recipe_record import RecipeRecord
 from logger import logger
 
 INSTAGRAM_REEL_URL_PATTERN = re.compile(
@@ -39,9 +39,9 @@ class AuthorizationMiddleware(BaseMiddleware):
         if not isinstance(event, Message):
             return await handler(event, data)
 
-        # If whitelist is empty, no auth restriction is applied.
         if not self.authorized_user_ids:
-            return await handler(event, data)
+            await event.answer("Accès refusé. Vous n'êtes pas autorisé.")
+            return None
 
         user = event.from_user
         if not user:
@@ -125,9 +125,9 @@ class TelegramConnector(InstachefConnector):
             waiting_message = await message.answer(
                 "Traitement en cours, ça peut prendre quelques secondes..."
             )
-            
+
             try:
-                recipe = await self._process_reel(reel_url)
+                record = await self._process_reel(reel_url)
             except NotARecipeError:
                 await waiting_message.edit_text(
                     "Ce Reel ne contient pas de recette valide. Envoie un autre Reel ! 👨‍🍳"
@@ -137,6 +137,8 @@ class TelegramConnector(InstachefConnector):
                 await waiting_message.edit_text(f"Erreur: {exc}")
                 return
 
+            recipe = record.recipe
+
             response = Text(
                 Bold(recipe.title),
                 "\n\n",
@@ -145,10 +147,10 @@ class TelegramConnector(InstachefConnector):
             )
             await waiting_message.edit_text(response.as_html(), parse_mode="HTML")
 
-    async def _process_reel(self, reel_url: str) -> Recipe:
+    async def _process_reel(self, reel_url: str) -> RecipeRecord:
         try:
             return cast(
-                Recipe,
+                RecipeRecord,
                 await asyncio.to_thread(self.service.execute, reel_url),
             )
         except NotARecipeError:

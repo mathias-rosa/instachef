@@ -123,9 +123,15 @@ The current flow is:
    # Telegram bot
    TELEGRAM_BOT_TOKEN=your-telegram-bot-token
    TELEGRAM_AUTHORIZED_USER_IDS=123456789,987654321
+
+    # Storage backend
+    RECIPE_REPOSITORY_BACKEND=supabase  # or local_json
    ```
 
-3. **Configure Supabase database** (using the provided SQL script or via the dashboard).
+3. **Configure the storage backend**.
+
+- `supabase`: create the `recipes` table in Supabase.
+- `local_json`: no database setup required.
 
 ### Environment Variables
 
@@ -133,10 +139,12 @@ The current flow is:
 | --- | --- | --- |
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_KEY` | Yes | Supabase anon key |
+| `RECIPE_REPOSITORY_BACKEND` | No | Storage backend (`supabase`, `local_json`) |
+| `LOCAL_JSON_TARGET_DIR` | No | Local JSON directory (default: `db`) |
 | `AI_MODEL` | No | Model name (default: `gemini-3.1-flash-lite-preview`) |
 | `GOOGLE_API_KEY` | No | Gemini API key (Pydantic AI reads it automatically) |
 | `TELEGRAM_BOT_TOKEN` | yes for `--mode telegram` | Telegram bot token |
-| `TELEGRAM_AUTHORIZED_USER_IDS` | No | Comma-separated list of allowed Telegram user IDs |
+| `TELEGRAM_AUTHORIZED_USER_IDS` | No | Comma-separated list of allowed Telegram user IDs; leave empty to deny all Telegram access |
 
 **Note:** For other AI providers (OpenAI, Anthropic), set `AI_MODEL` to the appropriate model name and ensure the corresponding env var is set (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.). See [Pydantic AI models](https://ai.pydantic.dev/models/overview/).
 
@@ -191,7 +199,6 @@ The extraction provider uses Pydantic AI with Gemini by default. The system prom
 
 - French output only
 - metric units only
-- sub-recipes for self-contained components
 - a stable, structured recipe format
 
 To use another provider, set `AI_MODEL` and the corresponding API key:
@@ -227,4 +234,3 @@ See [Pydantic AI models](https://ai.pydantic.dev/models/overview/) for the full 
 
 - Some reels are region-restricted or private.
 - Try a different URL.
-

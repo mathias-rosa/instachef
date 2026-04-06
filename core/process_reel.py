@@ -2,7 +2,6 @@ import os
 
 from core.ports import RecipeExtractor, RecipeRepository, ReelDownloader
 from domain.exceptions import NotARecipeError
-from domain.recipe import Recipe
 from domain.recipe_record import RecipeRecord
 from domain.recipe_source import ReelRecipeSource
 from logger import logger
@@ -19,7 +18,7 @@ class ProcessReelService:
         self.extractor = extractor
         self.repository = repository
 
-    def execute(self, reel_url: str) -> Recipe:
+    def execute(self, reel_url: str) -> RecipeRecord:
         downloaded = self.downloader.download_reel(reel_url)
 
         try:
@@ -33,9 +32,9 @@ class ProcessReelService:
             existing_record = self.repository.find_by_id(source.canonical_id())
             if existing_record:
                 logger.info(
-                    f"Reel already processed, reusing stored record: {existing_record.id}"
+                    f"Source already processed, reusing stored record: {existing_record.id}"
                 )
-                return existing_record.recipe
+                return existing_record
 
             recipe = self.extractor.extract_recipe(
                 downloaded.video_path, downloaded.caption
@@ -50,7 +49,7 @@ class ProcessReelService:
                 source=source,
             )
             saved = self.repository.save(recipe_result)
-            return saved.recipe
+            return saved
         finally:
             self._cleanup_video(downloaded.video_path)
 

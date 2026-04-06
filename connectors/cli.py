@@ -4,7 +4,7 @@ from typing import cast
 from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
 from domain.exceptions import InstachefError, NotARecipeError
-from domain.recipe import Recipe
+from domain.recipe_record import RecipeRecord
 from logger import logger
 
 PROMPT_REEL_URL = "Enter Instagram Reel URL: "
@@ -29,10 +29,11 @@ class CLIConnector(InstachefConnector):
 
             print("Processing the reel... This may take a few seconds.")
             try:
-                recipe = cast(
-                    Recipe,
+                record = cast(
+                    RecipeRecord,
                     await asyncio.to_thread(self.service.execute, reel_url),
                 )
+                recipe = record.recipe
                 print("\n✅ Recipe processed and saved successfully!")
                 print(f"Title: {recipe.title}")
                 print(f"Description: {recipe.description}")
