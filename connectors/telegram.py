@@ -10,6 +10,7 @@ from aiogram.utils.formatting import Bold, Text
 
 from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
+from domain.exceptions import NotARecipeError
 from domain.recipe import Recipe
 from logger import logger
 
@@ -124,7 +125,14 @@ class TelegramConnector(InstachefConnector):
             waiting_message = await message.answer(
                 "Traitement en cours, ça peut prendre quelques secondes..."
             )
-            recipe = await self._process_reel(reel_url)
+            
+            try:
+                recipe = await self._process_reel(reel_url)
+            except NotARecipeError:
+                await waiting_message.edit_text(
+                    "Ce Reel ne contient pas de recette valide. Envoie un autre Reel ! 👨‍🍳"
+                )
+                return
 
             if not recipe:
                 await waiting_message.edit_text(
@@ -143,6 +151,8 @@ class TelegramConnector(InstachefConnector):
     async def _process_reel(self, reel_url: str) -> Recipe | None:
         try:
             return await asyncio.to_thread(self.service.execute, reel_url)
+        except NotARecipeError:
+            raise
         except Exception as exc:
             logger.error(f"Telegram bot reel processing error: {exc}")
             return None

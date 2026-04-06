@@ -1,6 +1,7 @@
 import os
 
 from core.ports import RecipeExtractor, RecipeRepository, ReelDownloader
+from domain.exceptions import NotARecipeError
 from domain.recipe import Recipe
 from domain.recipe_record import RecipeRecord
 from domain.recipe_source import ReelRecipeSource
@@ -43,6 +44,10 @@ class ProcessReelService:
             )
             if not recipe:
                 return None
+
+            if not recipe.is_recipe:
+                logger.info("The extracted content is not a valid recipe.")
+                raise NotARecipeError("The extracted content is not a valid recipe.")
 
             recipe_result = RecipeRecord(
                 recipe=recipe,

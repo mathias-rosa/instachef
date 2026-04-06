@@ -2,6 +2,7 @@ import asyncio
 
 from connectors import InstachefConnector
 from core.process_reel import ProcessReelService
+from domain.exceptions import NotARecipeError
 from logger import logger
 
 PROMPT_REEL_URL = "Enter Instagram Reel URL: "
@@ -34,6 +35,8 @@ class CLIConnector(InstachefConnector):
                 print("\n✅ Recipe processed and saved successfully!")
                 print(f"Title: {recipe.title}")
                 print(f"Description: {recipe.description}")
+            except NotARecipeError:
+                print("Error: The extracted content is not a valid recipe.")
             except Exception as exc:
                 logger.error(f"CLI processing error: {exc}")
                 print("An unexpected error occurred while processing the reel.")

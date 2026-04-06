@@ -77,6 +77,11 @@ class InstructionStep(BaseModel):
 
 
 class Recipe(BaseModel):
+    is_recipe: bool = Field(
+        default=True,
+        description="Indique si l'entrée est une recette valide ou non.",
+    )
+
     title: str
     description: str = Field(
         description="Une phrase qui donne envie et résume le plat."
