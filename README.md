@@ -28,6 +28,17 @@ uv run main.py --mode cli
 uv run main.py --mode telegram
 ```
 
+### Run Frontend Dashboard
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Then open `http://localhost:5173`.
+
 For full setup instructions, see [Installation](#installation).
 
 ## Docker Deployment
@@ -62,7 +73,7 @@ Stop it with:
 docker compose down
 ```
 
-### Notes
+### Docker Notes
 
 - `db/` and `downloaded_reels/` are mounted as volumes to persist local data and temporary files.
 - The application mode is controlled by `INSTACHEF_MODE` (`cli` or `telegram`).
@@ -183,6 +194,8 @@ The current flow is:
 | `GOOGLE_API_KEY` | No | Gemini API key (Pydantic AI reads it automatically) |
 | `TELEGRAM_BOT_TOKEN` | yes for `--mode telegram` | Telegram bot token |
 | `TELEGRAM_AUTHORIZED_USER_IDS` | No | Comma-separated list of allowed Telegram user IDs; leave empty to deny all Telegram access |
+| `VITE_SUPABASE_URL` | Yes for `frontend/` | Supabase project URL used by the dashboard |
+| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Yes for `frontend/` | Supabase publishable default key used by the dashboard |
 
 **Note:** For other AI providers (OpenAI, Anthropic), set `AI_MODEL` to the appropriate model name and ensure the corresponding env var is set (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.). See [Pydantic AI models](https://ai.pydantic.dev/models/overview/).
 
@@ -201,6 +214,24 @@ uv run main.py
 5. Downloaded video is cleaned up
 
 Type `exit` to quit the loop.
+
+### Frontend Dashboard (HeroUI)
+
+The repository includes a small React + HeroUI dashboard in `frontend/`.
+
+It fetches `id`, `recipe`, `source`, and `created_at` from the Supabase `recipes` table, then displays cards with:
+
+- title and author
+- quick metadata (date, type, difficulty, servings)
+- ingredients preview
+- direct link to the source reel
+
+Run it with:
+
+```bash
+cd frontend
+npm run dev
+```
 
 ### Data Model & Output
 
