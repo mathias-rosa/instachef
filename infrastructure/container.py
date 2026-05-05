@@ -8,13 +8,18 @@ from providers.reels_downloader import ReelDownloader
 from providers.supabase_recipe_repository import SupabaseRecipeRepository
 
 
+def build_repository(config: AppConfig):
+    """Build and return the recipe repository based on config."""
+    return _build_repository(config)
+
+
 def build_process_reel_service(
     config: AppConfig,
+    repository,
     target_dir: str = "downloaded_reels",
 ) -> ProcessReelService:
     downloader = ReelDownloader(target_dir=target_dir)
     extractor = AiRecipeExtractor(model_name=config.ai_model)
-    repository = _build_repository(config)
     return ProcessReelService(
         downloader=downloader,
         extractor=extractor,

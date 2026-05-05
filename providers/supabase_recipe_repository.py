@@ -61,3 +61,31 @@ class SupabaseRecipeRepository(RecipeRepository):
             raise RepositoryReadError(
                 f"Error finding recipe by id in Supabase: {exc}"
             ) from exc
+
+    def list_ids(self) -> list[str]:
+        try:
+            response = (
+                self.client.table(self.TABLE_NAME).select("id").order("id").execute()
+            )
+            rows = getattr(response, "data", None) or []
+            return [row["id"] for row in rows if row.get("id")]
+        except Exception as exc:
+            logger.error(f"Error listing recipe ids in Supabase: {exc}")
+            raise RepositoryReadError(
+                f"Error listing recipe ids in Supabase: {exc}"
+            ) from exc
+
+    def get_recent_recipes(self, limit: int = 10) -> list[RecipeRecord]:
+        ids = self.list_ids()
+        recent_ids = ids[-limit:] if ids else []
+
+        recipes = []
+        for record_id in reversed(recent_ids):
+            try:
+                record = self.find_by_id(record_id)
+                if record:
+                    recipes.append(record)
+            except Exception as exc:
+                logger.warning(f"Failed to load recipe {record_id}: {exc}")
+
+        return recipes

@@ -68,3 +68,33 @@ class MongoDBRecipeRepository(RecipeRepository):
             raise RepositoryReadError(
                 f"Error finding recipe by id in MongoDB: {exc}"
             ) from exc
+
+    def list_ids(self) -> list[str]:
+        try:
+            cursor = self.collection.find({}, {"id": 1, "_id": 0}).sort("id", 1)
+            return [document["id"] for document in cursor if document.get("id")]
+        except PyMongoError as exc:
+            logger.error(f"Error listing recipe ids in MongoDB: {exc}")
+            raise RepositoryReadError(
+                f"Error listing recipe ids in MongoDB: {exc}"
+            ) from exc
+        except Exception as exc:
+            logger.error(f"Error listing recipe ids in MongoDB: {exc}")
+            raise RepositoryReadError(
+                f"Error listing recipe ids in MongoDB: {exc}"
+            ) from exc
+
+    def get_recent_recipes(self, limit: int = 10) -> list[RecipeRecord]:
+        ids = self.list_ids()
+        recent_ids = ids[-limit:] if ids else []
+
+        recipes = []
+        for record_id in reversed(recent_ids):
+            try:
+                record = self.find_by_id(record_id)
+                if record:
+                    recipes.append(record)
+            except Exception as exc:
+                logger.warning(f"Failed to load recipe {record_id}: {exc}")
+
+        return recipes

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from connectors.cli import CLIConnector
 from connectors.telegram import TelegramConnector
 from infrastructure.config import AppConfig
-from infrastructure.container import build_process_reel_service
+from infrastructure.container import build_process_reel_service, build_repository
 from logger import logger
 
 load_dotenv()
@@ -23,7 +23,8 @@ async def main() -> None:
     args = parser.parse_args()
 
     config = AppConfig.from_env()
-    service = build_process_reel_service(config=config)
+    repository = build_repository(config=config)
+    service = build_process_reel_service(config=config, repository=repository)
 
     if args.mode == "cli":
         connector = CLIConnector(service=service)
@@ -34,7 +35,8 @@ async def main() -> None:
             raise ValueError("TELEGRAM_BOT_TOKEN must be set")
 
         connector = TelegramConnector(
-            service=service,
+            reelsProcessingService=service,
+            recipeRepository=repository,
             token=token,
             authorized_user_ids=set(config.telegram_authorized_user_ids),
         )

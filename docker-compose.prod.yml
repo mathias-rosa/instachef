@@ -1,4 +1,21 @@
 services:
+  mongo:
+    image: mongo:7
+    container_name: instachef_mongo
+    restart: unless-stopped
+    network_mode: "service:vpn"
+    depends_on:
+      - vpn
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-instachef}
+    volumes:
+      - mongo_prod_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   instachef:
     build:
       context: .
@@ -7,11 +24,17 @@ services:
     restart: unless-stopped
     network_mode: "service:vpn" 
     depends_on:
-      - vpn
+      mongo:
+        condition: service_healthy
+      vpn:
+        condition: service_started
     env_file:
       - .env
     environment:
       INSTACHEF_MODE: ${INSTACHEF_MODE:-telegram}
+      RECIPE_REPOSITORY_BACKEND: ${RECIPE_REPOSITORY_BACKEND:-mongodb}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-instachef}
     command: uv run main.py --mode ${INSTACHEF_MODE:-telegram}
     volumes:
       - ./db:/app/db
@@ -36,3 +59,6 @@ services:
     entrypoint: >
       sh -c "echo \"$$WIREGUARD_CONF_64\" | base64 -d > /config/wg0.conf && exec /init"
     restart: unless-stopped
+
+volumes:
+  mongo_prod_data:

@@ -24,7 +24,12 @@ tasks:
   dev:cli:
     desc: Run app in CLI mode (requires dev:up first)
     cmds:
-      - export $(cat .env.dev 2>/dev/null | grep -v '^#' | xargs) || true && uv run main.py --mode cli
+      - uv run main.py --mode cli
+
+  dev:telegram:
+    desc: Run app in Telegram mode (requires dev:up first)
+    cmds:
+      - uv run main.py --mode telegram
 
   # Dependencies
   sync:
