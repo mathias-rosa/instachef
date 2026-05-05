@@ -9,9 +9,27 @@ services:
       - .env
     environment:
       INSTACHEF_MODE: ${INSTACHEF_MODE:-telegram}
+      RECIPE_REPOSITORY_BACKEND: mongodb
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-instachef}
+      MONGODB_COLLECTION: ${MONGODB_COLLECTION:-recipes}
+    depends_on:
+      mongo:
+        condition: service_started
     command: uv run main.py --mode ${INSTACHEF_MODE:-telegram}
     volumes:
       - ./db:/app/db
       - ./downloaded_reels:/app/downloaded_reels
     stdin_open: true
     tty: true
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

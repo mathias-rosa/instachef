@@ -1,9 +1,9 @@
 import os
 from dataclasses import dataclass, field
+
 from logger import logger
 
-
-SUPPORTED_REPOSITORY_BACKENDS = {"supabase", "local_json"}
+SUPPORTED_REPOSITORY_BACKENDS = {"supabase", "local_json", "mongodb"}
 
 
 @dataclass(frozen=True)
@@ -13,6 +13,9 @@ class AppConfig:
     supabase_url: str | None
     supabase_key: str | None
     local_json_target_dir: str
+    mongodb_uri: str | None
+    mongodb_database: str
+    mongodb_collection: str
     telegram_bot_token: str | None
     telegram_authorized_user_ids: list[int] = field(default_factory=list)
 
@@ -32,12 +35,20 @@ class AppConfig:
             )
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set")
 
+        mongodb_uri = os.getenv("MONGODB_URI")
+        if repository_backend == "mongodb" and not mongodb_uri:
+            logger.error("MONGODB_URI must be set for MongoDB backend.")
+            raise ValueError("MONGODB_URI must be set")
+
         return cls(
             ai_model=os.getenv("AI_MODEL", "gemini-3.1-flash-lite-preview").strip(),
             repository_backend=repository_backend,
             supabase_url=supabase_url,
             supabase_key=supabase_key,
             local_json_target_dir=os.getenv("LOCAL_JSON_TARGET_DIR", "db").strip(),
+            mongodb_uri=mongodb_uri,
+            mongodb_database=os.getenv("MONGODB_DATABASE", "instachef").strip(),
+            mongodb_collection=os.getenv("MONGODB_COLLECTION", "recipes").strip(),
             telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN"),
             telegram_authorized_user_ids=cls._parse_user_ids(
                 os.getenv("TELEGRAM_AUTHORIZED_USER_IDS", "")

@@ -1,10 +1,11 @@
 from core.process_reel import ProcessReelService
 from infrastructure.config import AppConfig
+from logger import logger
 from providers.ai_recipe_extractor import AiRecipeExtractor
 from providers.local_json_recipe_repository import LocalJsonRecipeRepository
+from providers.mongodb_recipe_repository import MongoDBRecipeRepository
 from providers.reels_downloader import ReelDownloader
 from providers.supabase_recipe_repository import SupabaseRecipeRepository
-from logger import logger
 
 
 def build_process_reel_service(
@@ -34,6 +35,16 @@ def _build_repository(config: AppConfig):
         return SupabaseRecipeRepository(
             url=config.supabase_url,
             key=config.supabase_key,
+        )
+
+    if config.repository_backend == "mongodb":
+        if not config.mongodb_uri:
+            logger.error("MONGODB_URI must be set for MongoDB backend.")
+            raise ValueError("MONGODB_URI must be set")
+        return MongoDBRecipeRepository(
+            uri=config.mongodb_uri,
+            database_name=config.mongodb_database,
+            collection_name=config.mongodb_collection,
         )
 
     logger.error(f"Unsupported repository backend: {config.repository_backend}")

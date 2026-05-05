@@ -48,6 +48,7 @@ class Ingredient(BaseModel):
     )
     quantity: float | None = Field(
         None,
+        ge=0.0,
         description="Valeur numérique uniquement. Ex: 2.0, 0.5, 680.0. None si non mesurable.",
     )
     unit: str | None = Field(
@@ -56,6 +57,7 @@ class Ingredient(BaseModel):
     )
     count: int | None = Field(
         None,
+        ge=1,
         description="Nombre d'unités entières. Ex: 3 œufs, 2 citrons. None si quantity/unit renseignés.",
     )
     note: str | None = Field(
@@ -91,17 +93,26 @@ class Recipe(BaseModel):
     difficulty: Difficulty
 
     prep_time_minutes: int | None = Field(
-        None, description="Temps de préparation actif en minutes."
+        None,
+        ge=0,
+        le=1440,
+        description="Temps de préparation actif en minutes (0-1440).",
     )
     cook_time_minutes: int | None = Field(
-        None, description="Temps de cuisson en minutes."
+        None, ge=0, le=1440, description="Temps de cuisson en minutes (0-1440)."
     )
     rest_time_minutes: int | None = Field(
-        None, description="Marinade, repos, réfrigération. None si absent."
+        None,
+        ge=0,
+        le=1440,
+        description="Marinade, repos, réfrigération (0-1440). None si absent.",
     )
 
     servings: int | None = Field(
-        None, description="Nombre de personnes. None si non déductible."
+        None,
+        ge=1,
+        le=100,
+        description="Nombre de personnes (1-100). None si non déductible.",
     )
 
     appliances: list[Appliance] = Field(

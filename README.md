@@ -1,6 +1,6 @@
 # InstaCHEF
 
-InstaCHEF turns Instagram reels into structured recipes using AI. Download a reel, extract recipe data with an LLM (Gemini or compatible), and save it to Supabase—via CLI or Telegram bot.
+InstaCHEF turns Instagram reels into structured recipes using AI. Download a reel, extract recipe data with an LLM (Gemini or compatible), and save it to Supabase, MongoDB, or local JSON—via CLI or Telegram bot.
 
 ## Quick Start
 
@@ -74,7 +74,7 @@ The code is organized into three layers:
 
 - `domain/` contains the Pydantic business models.
 - `core/` contains the ports and orchestration service.
-- `providers/` contains the concrete implementations: LLM extraction, JSON storage, reel downloading.
+- `providers/` contains the concrete implementations: LLM extraction, JSON storage, MongoDB storage, reel downloading.
 - `connectors/` contains user-facing entry points, currently mostly the CLI.
 
 ### Structure
@@ -94,7 +94,8 @@ domain/
 providers/
   ai_recipe_extractor.py     Pydantic AI + Gemini extraction
   local_json_recipe_repository.py  Local JSON persistence
-  reels_downloader.py        Reel download logic
+  mongodb_recipe_repository.py     MongoDB persistence
+  reels_downloader.py              Reel download logic
 db/                          Saved recipes
 downloaded_reels/            Temporary downloaded files
 ```
@@ -127,7 +128,7 @@ The current flow is:
 3. The service checks whether the canonical record already exists.
 4. If not, the LLM extracts a structured recipe.
 5. The service builds a `RecipeRecord` with the source and canonical id.
-6. The result is saved to Supabase or local JSON storage.
+6. The result is saved to Supabase, MongoDB, or local JSON storage.
 7. The temporary video file is removed.
 
 ## Installation
@@ -136,7 +137,7 @@ The current flow is:
 
 - Python 3.13+
 - `uv`
-- A Supabase account (for data storage)
+- A Supabase account or MongoDB instance (for data storage)
 - A Gemini API key (or another LLM provider)
 
 ### Setup
@@ -150,10 +151,6 @@ The current flow is:
 2. **Configure environment variables** (create a `.env` file):
 
    ```env
-   # Supabase
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_KEY=your-anon-key
-
    # AI 
    AI_MODEL=gemini-3.1-flash-lite-preview
    GOOGLE_API_KEY=your-gemini-key
@@ -163,13 +160,25 @@ The current flow is:
    TELEGRAM_AUTHORIZED_USER_IDS=123456789,987654321
 
     # Storage backend
-    RECIPE_REPOSITORY_BACKEND=supabase  # or local_json
+    RECIPE_REPOSITORY_BACKEND=supabase  # or local_json, mongodb
+    ## Local JSON
+    # LOCAL_JSON_TARGET_DIR=db
+
+    ## Supabase
+    SUPABASE_URL=https://your-project.supabase.co
+    SUPABASE_KEY=your-anon-key
+    
+    ## MongoDB
+    # MONGODB_URI=mongodb://localhost:27017
+    # MONGODB_DATABASE=instachef
+    # MONGODB_COLLECTION=recipes
    ```
 
 3. **Configure the storage backend**.
 
 - `supabase`: create the `recipes` table in Supabase.
 - `local_json`: no database setup required.
+- `mongodb`: no collection setup required, but the database and collection names must be reachable.
 
 ### Environment Variables
 
@@ -177,7 +186,10 @@ The current flow is:
 | --- | --- | --- |
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_KEY` | Yes | Supabase anon key |
-| `RECIPE_REPOSITORY_BACKEND` | No | Storage backend (`supabase`, `local_json`) |
+| `MONGODB_URI` | Yes for `mongodb` | MongoDB connection string |
+| `MONGODB_DATABASE` | No | MongoDB database name (default: `instachef`) |
+| `MONGODB_COLLECTION` | No | MongoDB collection name (default: `recipes`) |
+| `RECIPE_REPOSITORY_BACKEND` | No | Storage backend (`supabase`, `local_json`, `mongodb`) |
 | `LOCAL_JSON_TARGET_DIR` | No | Local JSON directory (default: `db`) |
 | `AI_MODEL` | No | Model name (default: `gemini-3.1-flash-lite-preview`) |
 | `GOOGLE_API_KEY` | No | Gemini API key (Pydantic AI reads it automatically) |
@@ -204,7 +216,7 @@ Type `exit` to quit the loop.
 
 ### Data Model & Output
 
-Recipes are stored as `RecipeRecord` rows in Supabase or as JSON documents locally.
+Recipes are stored as `RecipeRecord` rows in Supabase, as JSON documents locally, or as documents in MongoDB.
 
 `RecipeRecord` contains:
 
