@@ -16,16 +16,34 @@ uv sync
 cp .env.example .env
 ```
 
-### Run CLI
+### Run all connectors (CLI + API + Telegram when configured)
+
+```bash
+uv run main.py
+```
+
+### Run CLI only
 
 ```bash
 uv run main.py --mode cli
 ```
 
-### Or run Telegram bot
+### Run Telegram bot only
 
 ```bash
 uv run main.py --mode telegram
+```
+
+### Run API only
+
+```bash
+uv run main.py --mode api
+```
+
+### Run API and Telegram together
+
+```bash
+uv run main.py --mode api --mode telegram
 ```
 
 For full setup instructions, see [Installation](#installation).
@@ -65,7 +83,7 @@ docker compose down
 ### Notes
 
 - `db/` and `downloaded_reels/` are mounted as volumes to persist local data and temporary files.
-- The application mode is controlled by `INSTACHEF_MODE` (`cli` or `telegram`).
+- The application mode is controlled by repeated `--mode` flags. If omitted, all connectors are started.
 - Keep secrets in `.env`; it is not copied into the image.
 
 ## Project Overview
@@ -82,6 +100,7 @@ The code is organized into three layers:
 ```text
 main.py                      CLI entry point
 connectors/
+  api.py                     FastAPI adapter
   cli.py                     Console output
   rest.py                    Minimal HTTP adapter
 core/
@@ -195,15 +214,17 @@ The current flow is:
 | `GOOGLE_API_KEY` | No | Gemini API key (Pydantic AI reads it automatically) |
 | `TELEGRAM_BOT_TOKEN` | yes for `--mode telegram` | Telegram bot token |
 | `TELEGRAM_AUTHORIZED_USER_IDS` | No | Comma-separated list of allowed Telegram user IDs; leave empty to deny all Telegram access |
+| `API_HOST` | No | API bind host (default: `0.0.0.0`) |
+| `API_PORT` | No | API port (default: `8000`) |
 
 **Note:** For other AI providers (OpenAI, Anthropic), set `AI_MODEL` to the appropriate model name and ensure the corresponding env var is set (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.). See [Pydantic AI models](https://ai.pydantic.dev/models/overview/).
 
 ## Usage
 
-### CLI Mode (default)
+### CLI Mode
 
 ```bash
-uv run main.py
+uv run main.py --mode cli
 ```
 
 1. Enter an Instagram reel URL when prompted
