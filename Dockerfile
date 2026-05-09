@@ -13,4 +13,4 @@ RUN uv sync --frozen --no-dev --no-install-project
 # Copy application source.
 COPY . .
 
-CMD ["uv", "run", "main.py", "--mode", "telegram"]
+CMD ["uv", "run", "main.py", "--mode", "telegram", "--forwarded-allow-ips", "*", "--root-path", "/api/v1"]

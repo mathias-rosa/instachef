@@ -26,6 +26,11 @@ tasks:
     cmds:
       - uv run main.py --mode cli
 
+  dev:api:
+    desc: Run app in API mode (requires dev:up first)
+    cmds:
+      - uv run main.py --mode api
+
   dev:telegram:
     desc: Run app in Telegram mode (requires dev:up first)
     cmds:

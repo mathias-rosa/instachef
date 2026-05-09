@@ -2,7 +2,7 @@ import asyncio
 from math import ceil
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from connectors import InstachefConnector
@@ -35,12 +35,13 @@ class ApiConnector(InstachefConnector):
 
     def _build_app(self) -> FastAPI:
         app = FastAPI(title="InstaChef API", version="0.1.0")
+        router = APIRouter(prefix="/api/v1")
 
-        @app.get("/health")
+        @router.get("/health")
         async def health() -> dict[str, str]:
             return {"status": "ok"}
 
-        @app.get("/recipes", response_model=RecipePage)
+        @router.get("/recipes", response_model=RecipePage)
         async def list_recipes(
             page: int = Query(1, ge=1, description="Page number, starting at 1."),
             page_size: int = Query(
@@ -56,7 +57,7 @@ class ApiConnector(InstachefConnector):
                 page_size,
             )
 
-        @app.get("/recipes/{recipe_id}", response_model=RecipeRecord)
+        @router.get("/recipes/{recipe_id}", response_model=RecipeRecord)
         async def get_recipe(recipe_id: str) -> RecipeRecord:
             record = await asyncio.to_thread(
                 self.repository.find_by_id,
@@ -66,6 +67,7 @@ class ApiConnector(InstachefConnector):
                 raise HTTPException(status_code=404, detail="Recipe not found")
             return record
 
+        app.include_router(router)
         return app
 
     def _paginate_recipes(self, page: int, page_size: int) -> RecipePage:
