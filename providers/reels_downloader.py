@@ -1,6 +1,5 @@
 from glob import glob
 from pathlib import Path
-from typing import cast
 
 from instaloader import Instaloader, Post
 
@@ -71,7 +70,7 @@ class ReelDownloader:
     def _fetch_post(self, loader: Instaloader, shortcode: str) -> Post:
         reel: Post = Post.from_shortcode(loader.context, shortcode)
         assert isinstance(reel, Post), "The fetched object is not a Post instance."
-        return cast(Post, reel)
+        return reel
 
     def _expected_video_path(self, shortcode: str) -> str:
         return str(Path(self.target_dir) / f"{shortcode}.mp4")

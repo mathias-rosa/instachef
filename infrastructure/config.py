@@ -4,12 +4,15 @@ from dataclasses import dataclass, field
 from logger import logger
 
 SUPPORTED_REPOSITORY_BACKENDS = {"supabase", "local_json", "mongodb"}
+SUPPORTED_DOWNLOADER_BACKENDS = {"direct", "http"}
 
 
 @dataclass(frozen=True)
 class AppConfig:
     ai_model: str
     repository_backend: str
+    downloader_backend: str
+    downloader_http_url: str | None
     supabase_url: str | None
     supabase_key: str | None
     local_json_target_dir: str
@@ -29,6 +32,17 @@ class AppConfig:
             logger.error(f"Invalid repository backend: {repository_backend}")
             raise ValueError(f"RECIPE_REPOSITORY_BACKEND must be one of: {supported}")
 
+        downloader_backend = os.getenv("DOWNLOADER_BACKEND", "direct").strip()
+        if downloader_backend not in SUPPORTED_DOWNLOADER_BACKENDS:
+            supported = ", ".join(sorted(SUPPORTED_DOWNLOADER_BACKENDS))
+            logger.error(f"Invalid downloader backend: {downloader_backend}")
+            raise ValueError(f"DOWNLOADER_BACKEND must be one of: {supported}")
+
+        downloader_http_url = os.getenv("DOWNLOADER_HTTP_URL")
+        if downloader_backend == "http" and not downloader_http_url:
+            logger.error("DOWNLOADER_HTTP_URL must be set when DOWNLOADER_BACKEND=http")
+            raise ValueError("DOWNLOADER_HTTP_URL must be set for HTTP downloader")
+
         supabase_url = os.getenv("SUPABASE_URL")
         supabase_key = os.getenv("SUPABASE_KEY")
         if repository_backend == "supabase" and (not supabase_url or not supabase_key):
@@ -45,6 +59,8 @@ class AppConfig:
         return cls(
             ai_model=os.getenv("AI_MODEL", "gemini-3.1-flash-lite-preview").strip(),
             repository_backend=repository_backend,
+            downloader_backend=downloader_backend,
+            downloader_http_url=downloader_http_url,
             supabase_url=supabase_url,
             supabase_key=supabase_key,
             local_json_target_dir=os.getenv("LOCAL_JSON_TARGET_DIR", "db").strip(),

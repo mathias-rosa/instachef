@@ -15,6 +15,20 @@ services:
       timeout: 5s
       retries: 5
 
+  reels-downloader:
+    build:
+      context: .
+      dockerfile: Dockerfile.downloader
+    image: instachef:downloader
+    container_name: reels_downloader
+    restart: unless-stopped
+    network_mode: "service:vpn"
+    depends_on:
+      vpn:
+        condition: service_started
+    volumes:
+      - ./downloaded_reels:/app/downloaded_reels
+
   instachef:
     build:
       context: .
@@ -22,7 +36,8 @@ services:
     image: instachef:latest
     container_name: instachef
     restart: unless-stopped
-    network_mode: "service:vpn"
+    networks:
+      - internal
     depends_on:
       mongo:
         condition: service_healthy
@@ -33,6 +48,8 @@ services:
     environment:
       INSTACHEF_MODES: ${INSTACHEF_MODES:-telegram api}
       RECIPE_REPOSITORY_BACKEND: ${RECIPE_REPOSITORY_BACKEND:-mongodb}
+      DOWNLOADER_BACKEND: http
+      DOWNLOADER_HTTP_URL: http://vpn:8001
       MONGODB_URI: mongodb://instachef_mongo:27017
       MONGODB_DATABASE: ${MONGODB_DATABASE:-instachef}
       API_HOST: 0.0.0.0
@@ -43,6 +60,8 @@ services:
         "-c",
         'set --; for mode in $${INSTACHEF_MODES:-telegram api}; do set -- "$$@" --mode "$$mode"; done; exec uv run main.py "$$@"',
       ]
+    ports:
+      - "${API_PORT:-8000}:${API_PORT:-8000}"
     volumes:
       - ./db:/app/db
       - ./downloaded_reels:/app/downloaded_reels
@@ -64,7 +83,7 @@ services:
     networks:
       - internal
     ports:
-      - "${API_PORT:-8000}:${API_PORT:-8000}"
+      - "8001:8001"
     environment:
       - WIREGUARD_CONF_64=${WIREGUARD_CONF_64}
     entrypoint: >

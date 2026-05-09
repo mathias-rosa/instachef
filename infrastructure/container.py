@@ -2,6 +2,7 @@ from core.process_reel import ProcessReelService
 from infrastructure.config import AppConfig
 from logger import logger
 from providers.ai_recipe_extractor import AiRecipeExtractor
+from providers.http_reel_downloader import HttpReelDownloader
 from providers.local_json_recipe_repository import LocalJsonRecipeRepository
 from providers.mongodb_recipe_repository import MongoDBRecipeRepository
 from providers.reels_downloader import ReelDownloader
@@ -18,7 +19,16 @@ def build_process_reel_service(
     repository,
     target_dir: str = "downloaded_reels",
 ) -> ProcessReelService:
-    downloader = ReelDownloader(target_dir=target_dir)
+    # Select downloader based on configuration
+    if config.downloader_backend == "http":
+        if not config.downloader_http_url:
+            logger.error("downloader_http_url not set for HTTP backend")
+            raise ValueError("DOWNLOADER_HTTP_URL must be set")
+        downloader = HttpReelDownloader(base_url=config.downloader_http_url)
+    else:
+        # Default to direct downloader
+        downloader = ReelDownloader(target_dir=target_dir)
+
     extractor = AiRecipeExtractor(model_name=config.ai_model)
     return ProcessReelService(
         downloader=downloader,
