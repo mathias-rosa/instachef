@@ -1,11 +1,15 @@
 version: "3"
 
+includes:
+  api:
+    taskfile: ./api/Taskfile.yml
+    dir: ./api
+
 tasks:
   default:
     cmds:
       - task --list
 
-  # Development
   dev:up:
     desc: Start MongoDB for development
     cmds:
@@ -20,52 +24,3 @@ tasks:
     desc: View MongoDB logs
     cmds:
       - docker compose -f docker-compose.dev.yml logs -f mongo
-
-  dev:cli:
-    desc: Run app in CLI mode (requires dev:up first)
-    cmds:
-      - uv run main.py --mode cli
-
-  dev:api:
-    desc: Run app in API mode (requires dev:up first)
-    cmds:
-      - uv run main.py --mode api
-
-  dev:telegram:
-    desc: Run app in Telegram mode (requires dev:up first)
-    cmds:
-      - uv run main.py --mode telegram
-
-  # Dependencies
-  sync:
-    desc: Install dependencies with uv
-    cmds:
-      - uv sync
-
-  # Code Quality
-  lint:
-    desc: Check code style with ruff
-    cmds:
-      - uv run ruff check .
-
-  format:
-    desc: Format code with ruff
-    cmds:
-      - uv run ruff format .
-
-  check:
-    desc: Run lint and format checks
-    cmds:
-      - task lint
-      - uv run ruff format --check .
-
-  # Database
-  db:mongosh:
-    desc: Open MongoDB shell
-    cmds:
-      - docker compose -f docker-compose.dev.yml exec mongo mongosh instachef
-
-  db:reset:
-    desc: Remove MongoDB volumes (WARNING - deletes data)
-    cmds:
-      - docker compose -f docker-compose.dev.yml down -v
