@@ -57,7 +57,7 @@ class AppConfig:
             raise ValueError("MONGODB_URI must be set")
 
         return cls(
-            ai_model=os.getenv("AI_MODEL", "gemini-3.1-flash-lite-preview").strip(),
+            ai_model=os.getenv("AI_MODEL", "gemini-3.1-flash-lite").strip(),
             repository_backend=repository_backend,
             downloader_backend=downloader_backend,
             downloader_http_url=downloader_http_url,
