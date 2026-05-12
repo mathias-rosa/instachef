@@ -13,6 +13,8 @@ class ReelDownloader:
         self.target_dir = target_dir
 
     def download_reel(self, reel_url: str) -> DownloadedReel:
+        # Ensure download directory exists for temp files and media output.
+        Path(self.target_dir).mkdir(parents=True, exist_ok=True)
         shortcode = self._extract_shortcode(reel_url)
         if not shortcode:
             logger.error("Invalid source URL provided for reel download.")
