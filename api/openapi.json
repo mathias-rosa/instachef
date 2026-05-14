@@ -516,14 +516,7 @@
       "RecipeRecord": {
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Id",
             "description": "Canonical, stable identifier for the stored record."
           },
@@ -555,6 +548,7 @@
         },
         "type": "object",
         "required": [
+          "id",
           "recipe",
           "source"
         ],

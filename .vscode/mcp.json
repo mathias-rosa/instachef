@@ -1,0 +1,13 @@
+{
+	"servers": {
+		"heroui": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@heroui/react-mcp@1.1.0"
+			],
+			"type": "stdio"
+		}
+	},
+	"inputs": []
+}

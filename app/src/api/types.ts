@@ -235,7 +235,7 @@ export interface components {
              * Id
              * @description Canonical, stable identifier for the stored record.
              */
-            id?: string | null;
+            id: string;
             recipe: components["schemas"]["Recipe"];
             /** Source */
             source: components["schemas"]["ReelRecipeSource"] | components["schemas"]["PhotoRecipeSource"] | components["schemas"]["TextRecipeSource"];

@@ -12,8 +12,7 @@ from logger import logger
 
 
 class RecipeRecord(BaseModel):
-    id: str | None = Field(
-        None,
+    id: str = Field(
         description="Canonical, stable identifier for the stored record.",
     )
     recipe: Recipe
