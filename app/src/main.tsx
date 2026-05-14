@@ -9,6 +9,13 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { queryClient } from "./lib/query-client";
 
+// Register Service Worker for PWA
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
+    console.warn("Service Worker registration failed:", err);
+  });
+}
+
 // Create a new router instance
 const router = createRouter({
   routeTree,

@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# PWA generated files
+public/sw.js
+public/workbox-*.js
