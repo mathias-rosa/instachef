@@ -1,4 +1,21 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    image: instachef:app
+    container_name: instachef_app
+    restart: unless-stopped
+    networks:
+      - internal
+    depends_on:
+      instachef:
+        condition: service_started
+    ports:
+      - "${APP_PORT:-3000}:80"
+    environment:
+      - API_BASE_URL=http://instachef:8000
+
   mongo:
     image: mongo:7
     container_name: instachef_mongo
