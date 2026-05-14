@@ -27,11 +27,13 @@ class ApiConnector(InstachefConnector):
         self,
         service: ProcessReelService,
         repository: RecipeRepository,
+        frontend_url: str,
         host: str,
         port: int,
     ) -> None:
         self.service = service
         self.repository = repository
+        self.frontend_url = frontend_url
         self.host = host
         self.port = port
         self.app = self._build_app()
@@ -42,7 +44,7 @@ class ApiConnector(InstachefConnector):
         app.add_middleware(
             CORSMiddleware,
             allow_origins=[
-                "http://localhost:5173",
+                self.frontend_url,
             ],
             allow_credentials=True,
             allow_methods=["*"],

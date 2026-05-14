@@ -61,6 +61,7 @@ async def main() -> None:
             ApiConnector(
                 service=service,
                 repository=repository,
+                frontend_url=config.frontend_url,
                 host=config.api_host,
                 port=config.api_port,
             )

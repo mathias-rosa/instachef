@@ -20,6 +20,7 @@ class AppConfig:
     mongodb_database: str
     mongodb_collection: str
     telegram_bot_token: str | None
+    frontend_url: str
     api_host: str
     api_port: int
     telegram_authorized_user_ids: list[int] = field(default_factory=list)
@@ -68,6 +69,7 @@ class AppConfig:
             mongodb_database=os.getenv("MONGODB_DATABASE", "instachef").strip(),
             mongodb_collection=os.getenv("MONGODB_COLLECTION", "recipes").strip(),
             telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN"),
+            frontend_url=os.getenv("FRONTEND_URL", "http://localhost:5173").strip(),
             api_host=os.getenv("API_HOST", "0.0.0.0").strip(),
             api_port=int(os.getenv("API_PORT", "8000")),
             telegram_authorized_user_ids=cls._parse_user_ids(
