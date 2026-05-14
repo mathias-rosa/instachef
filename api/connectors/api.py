@@ -1,8 +1,10 @@
 import asyncio
+import json
 from math import ceil
 
 import uvicorn
 from fastapi import APIRouter, FastAPI, HTTPException, Query
+from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
 
 from connectors import InstachefConnector
@@ -68,6 +70,10 @@ class ApiConnector(InstachefConnector):
             return record
 
         app.include_router(router)
+        # save open API spec to file
+        openapi = get_openapi(title=app.title, version=app.version, routes=app.routes)
+        with open("openapi.json", "w") as f:
+            f.write(json.dumps(openapi, indent=2))
         return app
 
     def _paginate_recipes(self, page: int, page_size: int) -> RecipePage:

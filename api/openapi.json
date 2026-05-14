@@ -1,0 +1,693 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "InstaChef API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Api V1 Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes": {
+      "get": {
+        "summary": "List Recipes",
+        "operationId": "list_recipes_api_v1_recipes_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number, starting at 1.",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Page number, starting at 1."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "description": "Number of recipes per page.",
+              "default": 10,
+              "title": "Page Size"
+            },
+            "description": "Number of recipes per page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipePage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{recipe_id}": {
+      "get": {
+        "summary": "Get Recipe",
+        "operationId": "get_recipe_api_v1_recipes__recipe_id__get",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Appliance": {
+        "type": "string",
+        "enum": [
+          "four",
+          "airfryer",
+          "micro-ondes",
+          "mixeur",
+          "robot culinaire",
+          "batteur \u00e9lectrique",
+          "cuiseur vapeur",
+          "plaque de cuisson",
+          "autre"
+        ],
+        "title": "Appliance"
+      },
+      "CuisineType": {
+        "type": "string",
+        "enum": [
+          "fran\u00e7aise",
+          "italienne",
+          "asiatique",
+          "moyen-orientale",
+          "am\u00e9ricaine",
+          "m\u00e9diterran\u00e9enne",
+          "mexicaine",
+          "indienne",
+          "autre"
+        ],
+        "title": "CuisineType"
+      },
+      "Difficulty": {
+        "type": "string",
+        "enum": [
+          "facile",
+          "moyen",
+          "difficile"
+        ],
+        "title": "Difficulty"
+      },
+      "DishType": {
+        "type": "string",
+        "enum": [
+          "entr\u00e9e",
+          "plat principal",
+          "dessert",
+          "snack",
+          "boisson",
+          "sauce"
+        ],
+        "title": "DishType"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Ingredient": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Nom de l'ingr\u00e9dient uniquement. Ex: 'poulet', 'ail'."
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity",
+            "description": "Valeur num\u00e9rique uniquement. Ex: 2.0, 0.5, 680.0. None si non mesurable."
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit",
+            "description": "Unit\u00e9 de mesure. Ex: 'g', 'ml', 'c.\u00e0.s.', 'c.\u00e0.c.'. None si compt\u00e9 en unit\u00e9s."
+          },
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Count",
+            "description": "Nombre d'unit\u00e9s enti\u00e8res. Ex: 3 \u0153ufs, 2 citrons. None si quantity/unit renseign\u00e9s."
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Pr\u00e9paration ou pr\u00e9cision. Ex: 'finement hach\u00e9', '\u00e0 temp\u00e9rature ambiante'."
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group",
+            "description": "Groupe d'appartenance si la recette a des composants distincts. Ex: 'Marinade', 'Sauce', 'Garniture'. None si recette plate."
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Ingredient"
+      },
+      "InstructionStep": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title",
+            "description": "Titre court de l'\u00e9tape. Ex: 'Marinade', 'Cuisson du riz', 'Dressage'. None si l'\u00e9tape ne correspond pas \u00e0 une phase distincte."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Instructions d\u00e9taill\u00e9es de l'\u00e9tape."
+          }
+        },
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "title": "InstructionStep"
+      },
+      "PhotoRecipeSource": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "const": "photo",
+            "title": "Source Type",
+            "default": "photo"
+          },
+          "photo_id": {
+            "type": "string",
+            "title": "Photo Id",
+            "description": "Stable photo fingerprint or external identifier."
+          },
+          "original_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Url",
+            "description": "Original photo URL when available."
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption",
+            "description": "Original photo caption."
+          }
+        },
+        "type": "object",
+        "required": [
+          "photo_id"
+        ],
+        "title": "PhotoRecipeSource"
+      },
+      "Recipe": {
+        "properties": {
+          "is_recipe": {
+            "type": "boolean",
+            "title": "Is Recipe",
+            "description": "Indique si l'entr\u00e9e est une recette valide ou non.",
+            "default": true
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Une phrase qui donne envie et r\u00e9sume le plat."
+          },
+          "cuisine_type": {
+            "$ref": "#/components/schemas/CuisineType"
+          },
+          "dish_type": {
+            "$ref": "#/components/schemas/DishType"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/Difficulty"
+          },
+          "prep_time_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1440.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Time Minutes",
+            "description": "Temps de pr\u00e9paration actif en minutes (0-1440)."
+          },
+          "cook_time_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1440.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Time Minutes",
+            "description": "Temps de cuisson en minutes (0-1440)."
+          },
+          "rest_time_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1440.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rest Time Minutes",
+            "description": "Marinade, repos, r\u00e9frig\u00e9ration (0-1440). None si absent."
+          },
+          "servings": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Servings",
+            "description": "Nombre de personnes (1-100). None si non d\u00e9ductible."
+          },
+          "appliances": {
+            "items": {
+              "$ref": "#/components/schemas/Appliance"
+            },
+            "type": "array",
+            "title": "Appliances",
+            "description": "Appareils \u00e9lectrom\u00e9nagers requis. Vide si cuisson standard."
+          },
+          "utensils": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Utensils",
+            "description": "Ustensiles notables. Ex: 'wok', 'mandoline'. Exclure couteau, planche, bol."
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/Ingredient"
+            },
+            "type": "array",
+            "title": "Ingredients"
+          },
+          "instructions": {
+            "items": {
+              "$ref": "#/components/schemas/InstructionStep"
+            },
+            "type": "array",
+            "title": "Instructions"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "Mots-cl\u00e9s courts. Ex: 'one-pan', 'meal-prep', 'sans gluten'."
+          },
+          "tips": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tips",
+            "description": "Astuces du cr\u00e9ateur visibles dans la vid\u00e9o ou la caption."
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "cuisine_type",
+          "dish_type",
+          "difficulty",
+          "ingredients",
+          "instructions"
+        ],
+        "title": "Recipe"
+      },
+      "RecipePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RecipeRecord"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "page_size",
+          "total",
+          "total_pages"
+        ],
+        "title": "RecipePage"
+      },
+      "RecipeRecord": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Canonical, stable identifier for the stored record."
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/Recipe"
+          },
+          "source": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ReelRecipeSource"
+              },
+              {
+                "$ref": "#/components/schemas/PhotoRecipeSource"
+              },
+              {
+                "$ref": "#/components/schemas/TextRecipeSource"
+              }
+            ],
+            "title": "Source",
+            "discriminator": {
+              "propertyName": "source_type",
+              "mapping": {
+                "photo": "#/components/schemas/PhotoRecipeSource",
+                "reel": "#/components/schemas/ReelRecipeSource",
+                "text": "#/components/schemas/TextRecipeSource"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe",
+          "source"
+        ],
+        "title": "RecipeRecord"
+      },
+      "ReelRecipeSource": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "const": "reel",
+            "title": "Source Type",
+            "default": "reel"
+          },
+          "reel_url": {
+            "type": "string",
+            "title": "Reel Url",
+            "description": "Original Instagram Reel URL"
+          },
+          "shortcode": {
+            "type": "string",
+            "title": "Shortcode",
+            "description": "Unique identifier for the reel."
+          },
+          "author": {
+            "type": "string",
+            "title": "Author",
+            "description": "Coontent creator name"
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption",
+            "description": "Original reel caption"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reel_url",
+          "shortcode",
+          "author"
+        ],
+        "title": "ReelRecipeSource"
+      },
+      "TextRecipeSource": {
+        "properties": {
+          "source_type": {
+            "type": "string",
+            "const": "text",
+            "title": "Source Type",
+            "default": "text"
+          },
+          "text_id": {
+            "type": "string",
+            "title": "Text Id",
+            "description": "Stable text fingerprint or external identifier."
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author",
+            "description": "Author or sender of the text, when available."
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption",
+            "description": "Original message text or caption."
+          }
+        },
+        "type": "object",
+        "required": [
+          "text_id"
+        ],
+        "title": "TextRecipeSource"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
