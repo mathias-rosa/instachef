@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "@heroui/styles"; 
+
+html, body, #root {
+    @apply bg-background;
+}
