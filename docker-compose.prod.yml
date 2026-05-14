@@ -13,7 +13,7 @@ services:
     depends_on:
       instachef:
         condition: service_started
-    expose:
+    ports:
       - "80"
 
   mongo:
@@ -77,7 +77,7 @@ services:
         "-c",
         'set --; for mode in $${INSTACHEF_MODES:-telegram api}; do set -- "$$@" --mode "$$mode"; done; exec uv run main.py "$$@"',
       ]
-    expose:
+    ports:
       - "8000"
     volumes:
       - ./db:/app/db
