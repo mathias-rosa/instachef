@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="InstaChef Reels Downloader",
+    title="Cookachu Reels Downloader",
     description="Microservice for downloading Instagram Reels",
     version="1.0.0",
     lifespan=lifespan,

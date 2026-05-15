@@ -14,10 +14,10 @@ from aiogram.types import (
 )
 from aiogram.utils.formatting import Bold, Text
 
-from connectors import InstachefConnector
+from connectors import CookachuConnector
 from core.ports import RecipeRepository
 from core.process_reel import ProcessReelService
-from domain.exceptions import InstachefError, NotARecipeError
+from domain.exceptions import CookachuError, NotARecipeError
 from domain.recipe_record import RecipeRecord
 from logger import logger
 
@@ -73,7 +73,7 @@ class AuthorizationMiddleware(BaseMiddleware):
         return token.split("@", maxsplit=1)[0][1:].lower()
 
 
-class TelegramConnector(InstachefConnector):
+class TelegramConnector(CookachuConnector):
     def __init__(
         self,
         reelsProcessingService: ProcessReelService,
@@ -132,7 +132,7 @@ class TelegramConnector(InstachefConnector):
             if len(parts) < 2:
                 await message.answer(
                     "Usage: /recipe <recipe_id>\n\n"
-                    "Exemple: /recipe instachef__DTpNTQijLaj"
+                    "Exemple: /recipe cookachu__DTpNTQijLaj"
                 )
                 return
 
@@ -140,7 +140,7 @@ class TelegramConnector(InstachefConnector):
             if not recipe_id:
                 await message.answer(
                     "Usage: /recipe <recipe_id>\n\n"
-                    "Exemple: /recipe instachef__DTpNTQijLaj"
+                    "Exemple: /recipe cookachu__DTpNTQijLaj"
                 )
                 return
 
@@ -251,7 +251,7 @@ class TelegramConnector(InstachefConnector):
                     "Ce Reel ne contient pas de recette valide. Envoie un autre Reel ! 👨‍🍳"
                 )
                 return
-            except InstachefError as exc:
+            except CookachuError as exc:
                 await waiting_message.edit_text(f"Erreur: {exc}")
                 return
 
@@ -272,7 +272,7 @@ class TelegramConnector(InstachefConnector):
             )
         except NotARecipeError:
             raise
-        except InstachefError:
+        except CookachuError:
             raise
         except Exception as exc:
             logger.error(f"Unexpected error processing reel: {exc}")

@@ -1,6 +1,6 @@
-# InstaCHEF
+# Cookachu
 
-InstaCHEF turns Instagram reels into structured recipes using AI. Download a reel, extract recipe data with an LLM (Gemini or compatible), and save it to Supabase, MongoDB, or local JSON—via CLI or Telegram bot.
+Cookachu turns Instagram reels into structured recipes using AI. Download a reel, extract recipe data with an LLM (Gemini or compatible), and save it to Supabase, MongoDB, or local JSON—via CLI or Telegram bot.
 
 ## Quick Start
 
@@ -71,7 +71,7 @@ docker compose up -d
 ### Run in CLI mode
 
 ```bash
-INSTACHEF_MODE=cli docker compose run --rm instachef
+COOKACHU_MODE=cli docker compose run --rm cookachu
 ```
 
 Stop it with:
@@ -189,7 +189,7 @@ The current flow is:
     
     ## MongoDB
     # MONGODB_URI=mongodb://localhost:27017
-    # MONGODB_DATABASE=instachef
+    # MONGODB_DATABASE=cookachu
     # MONGODB_COLLECTION=recipes
    ```
 
@@ -206,7 +206,7 @@ The current flow is:
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_KEY` | Yes | Supabase anon key |
 | `MONGODB_URI` | Yes for `mongodb` | MongoDB connection string |
-| `MONGODB_DATABASE` | No | MongoDB database name (default: `instachef`) |
+| `MONGODB_DATABASE` | No | MongoDB database name (default: `cookachu`) |
 | `MONGODB_COLLECTION` | No | MongoDB collection name (default: `recipes`) |
 | `RECIPE_REPOSITORY_BACKEND` | No | Storage backend (`supabase`, `local_json`, `mongodb`) |
 | `LOCAL_JSON_TARGET_DIR` | No | Local JSON directory (default: `db`) |

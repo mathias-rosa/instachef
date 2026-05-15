@@ -7,7 +7,7 @@ services:
     volumes:
       - mongo_dev_data:/data/db
     environment:
-      MONGO_INITDB_DATABASE: instachef
+      MONGO_INITDB_DATABASE: cookachu
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 5s

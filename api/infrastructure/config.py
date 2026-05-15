@@ -66,7 +66,7 @@ class AppConfig:
             supabase_key=supabase_key,
             local_json_target_dir=os.getenv("LOCAL_JSON_TARGET_DIR", "db").strip(),
             mongodb_uri=mongodb_uri,
-            mongodb_database=os.getenv("MONGODB_DATABASE", "instachef").strip(),
+            mongodb_database=os.getenv("MONGODB_DATABASE", "cookachu").strip(),
             mongodb_collection=os.getenv("MONGODB_COLLECTION", "recipes").strip(),
             telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN"),
             frontend_url=os.getenv("FRONTEND_URL", "http://localhost:5173").strip(),

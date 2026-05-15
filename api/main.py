@@ -15,7 +15,7 @@ load_dotenv()
 
 async def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run InstaChef connectors in parallel.",
+        description="Run Cookachu connectors in parallel.",
     )
     parser.add_argument(
         "--mode",

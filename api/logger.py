@@ -2,7 +2,7 @@ import logging
 import sys
 
 
-def setup_logger(name: str = "instachef") -> logging.Logger:
+def setup_logger(name: str = "cookachu") -> logging.Logger:
     """Configure and return a logger instance."""
     logger = logging.getLogger(name)
 

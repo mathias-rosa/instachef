@@ -1,8 +1,8 @@
 from typing import Protocol
 
 
-class InstachefConnector(Protocol):
-    """Base interface for all InstaChef connectors."""
+class CookachuConnector(Protocol):
+    """Base interface for all Cookachu connectors."""
 
     async def run(self) -> None:
         """Run the connector."""

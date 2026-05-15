@@ -54,7 +54,7 @@ tasks:
   db:mongosh:
     desc: Open MongoDB shell
     cmds:
-      - docker compose -f docker-compose.dev.yml exec mongo mongosh instachef
+      - docker compose -f docker-compose.dev.yml exec mongo mongosh cookachu
 
   db:reset:
     desc: Remove MongoDB volumes (WARNING - deletes data)

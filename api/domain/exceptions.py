@@ -1,8 +1,8 @@
-class InstachefError(Exception):
+class CookachuError(Exception):
     """Base class for all application-level errors."""
 
 
-class SourceError(InstachefError):
+class SourceError(CookachuError):
     """Base class for source ingestion errors."""
 
 
@@ -18,7 +18,7 @@ class SourceDownloadError(SourceError):
     """Raised when source download succeeds partially but artifacts are unusable."""
 
 
-class ExtractionError(InstachefError):
+class ExtractionError(CookachuError):
     """Base class for extraction errors."""
 
 
@@ -38,7 +38,7 @@ class NotARecipeError(ExtractionError):
     """Raised when the extracted content is not a valid recipe."""
 
 
-class RepositoryError(InstachefError):
+class RepositoryError(CookachuError):
     """Base class for persistence errors."""
 
 

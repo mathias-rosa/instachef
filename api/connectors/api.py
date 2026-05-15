@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
 
-from connectors import InstachefConnector
+from connectors import CookachuConnector
 from core.ports import RecipeRepository
 from core.process_reel import ProcessReelService
 from domain.recipe_record import RecipeRecord
@@ -22,7 +22,7 @@ class RecipePage(BaseModel):
     total_pages: int
 
 
-class ApiConnector(InstachefConnector):
+class ApiConnector(CookachuConnector):
     def __init__(
         self,
         service: ProcessReelService,
@@ -39,7 +39,7 @@ class ApiConnector(InstachefConnector):
         self.app = self._build_app()
 
     def _build_app(self) -> FastAPI:
-        app = FastAPI(title="InstaChef API", version="0.1.0")
+        app = FastAPI(title="Cookachu API", version="0.1.0")
 
         app.add_middleware(
             CORSMiddleware,
