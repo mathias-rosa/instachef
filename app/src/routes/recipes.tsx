@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Card, Skeleton } from "@heroui/react";
+import { Card, Skeleton, Typography } from "@heroui/react";
 import { RecipeCard } from "@/components/RecipeCard";
 import { useRecipes } from "@/hooks/use-recipes";
 import { useEffect, useRef } from "react";
+import cookachuLogo from "@/assets/cookachu-logo.png";
 
 export const Route = createFileRoute("/recipes")({
   component: RecipesPage,
@@ -84,7 +85,19 @@ function RecipesPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 md:px-6 md:py-12">
-      <h1 className="text-3xl font-bold mb-6 md:mb-8">Mes Recettes</h1>
+      <div>
+        <img
+          src={cookachuLogo}
+          alt="Cookachu Logo"
+          className="w-20 h-20 mb-4 mx-auto md:mx-0"
+        />
+        <Typography.Heading
+          level={1}
+          className="text-3xl font-bold mb-6 md:mb-8"
+        >
+          Mes Recettes
+        </Typography.Heading>
+      </div>
 
       {recipes.length === 0 ? (
         <Card className="p-6">
