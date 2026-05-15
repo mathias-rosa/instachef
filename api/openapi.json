@@ -515,11 +515,6 @@
       },
       "RecipeRecord": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "Canonical, stable identifier for the stored record."
-          },
           "recipe": {
             "$ref": "#/components/schemas/Recipe"
           },
@@ -544,13 +539,18 @@
                 "text": "#/components/schemas/TextRecipeSource"
               }
             }
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "readOnly": true
           }
         },
         "type": "object",
         "required": [
-          "id",
           "recipe",
-          "source"
+          "source",
+          "id"
         ],
         "title": "RecipeRecord"
       },
