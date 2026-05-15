@@ -1,3 +1,5 @@
+import "@fontsource-variable/arima/wght.css";
+import "@fontsource-variable/inter/wght.css";
 import "./global.css";
 
 import { StrictMode } from "react";

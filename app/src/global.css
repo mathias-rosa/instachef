@@ -2,7 +2,13 @@
 @import "@heroui/styles"; 
 
 html, body, #root {
-    @apply bg-background;
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+}
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-arima);
 }
 
 /*
@@ -17,6 +23,7 @@ html, body, #root {
 .default,
 [data-theme="light"],
 [data-theme="default"] {
+
   /* Theme Colors (Light Mode) */
   --accent: oklch(62.96% 0.1075 73.31);
   --accent-foreground: oklch(99.11% 0 0);
@@ -54,13 +61,14 @@ html, body, #root {
   --field-radius: 0.75rem;
 
   /* Font Family */
-  /* Make sure to load Inter font in your app */
-  --font-sans: var(--font-inter);
+  --font-arima: 'Arima Variable', system-ui;
+  --font-inter: "Inter Variable", sans-serif;
 }
 
 .dark,
 [data-theme="dark"] {
   color-scheme: dark;
+
   /* Theme Colors (Dark Mode) */
   --accent: oklch(62.96% 0.1075 73.31);
   --accent-foreground: oklch(99.11% 0 0);

@@ -18,7 +18,9 @@ export const RecipeSummaryCard = ({
   <Card className="gap-4">
     <Card.Header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div className="space-y-2">
-        <Card.Title className="text-2xl md:text-3xl">{recipe.title}</Card.Title>
+        <Card.Title className="text-2xl md:text-3xl font-display py-2">
+          {recipe.title}
+        </Card.Title>
         <Card.Description className="text-base text-muted">
           {recipe.description}
         </Card.Description>
